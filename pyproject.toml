@@ -1,0 +1,93 @@
+[tool.poetry]
+name = "project"
+version = "0.0.1"
+description = "FastAPI project"
+authors = []
+readme = "README.md"
+packages = []
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.12"
+# Сюди додавайте ваші залежності (fastapi, uvicorn тощо)
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.7.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+# ==== pytest ====
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "--import-mode=importlib"
+python_files = [
+    "tests.py",
+    "test_*.py",
+]
+
+# ==== Coverage (Аналіз покриття тестами) ====
+[tool.coverage.run]
+include = ["src/**"]  # Вказує на вашу папку з кодом src
+omit = ["*/tests/*"]
+
+# ==== mypy (Статична типізація, дуже корисна для FastAPI) ====
+[tool.mypy]
+python_version = "3.12"
+check_untyped_defs = true
+ignore_missing_imports = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unused_configs = true
+
+# ==== Ruff (Сучасний лінтер та форматир) ====
+[tool.ruff]
+exclude = [
+    ".git",
+    ".mypy_cache",
+    ".ruff_cache",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+    "venv",
+]
+line-length = 88
+indent-width = 4
+target-version = "py312"
+
+[tool.ruff.lint]
+# Ми залишили ваш список правил, але прибрали "DJ" (Django)
+select = [
+  "F", "E", "W", "C90", "I", "N", "UP", "YTT",
+  "ASYNC", "D", "S", "BLE", "FBT", "B", "A", "COM",
+  "C4", "DTZ", "T10", "EM", "EXE", "FA", 'ISC',
+  "ICN", "G", 'INP', 'PIE', "T20", 'PYI', 'PT',
+  "Q", "RSE", "RET", "SLF", "SLOT", "SIM", "TID",
+  "TCH", "INT", "PTH", "ERA", "PD", "PGH", "PL",
+  "TRY", "FLY", "PERF", "RUF"
+]
+ignore = [
+  "S101",    # Дозволяє використовувати assert (часто потрібен у тестах pytest)
+  "RUF012",  # Вимикає сувору вимогу ClassVar для Pydantic-моделей FastAPI
+  "SIM102",  # Дозволяє вкладені if, якщо так читається краще
+  "UP038",   # Вимикає оптимізацію isinstance, яка може сповільнювати код
+  "D203",    # Сумісність форматування docstring
+  "D213",    # Сумісність форматування docstring
+  "COM812",  # Сумісність із форматиром ruff-format
+  "ISC001"   # Сумісність із форматиром ruff-format
+]
+fixable = ["ALL"]
+unfixable = []
+extend-unsafe-fixes = ["UP038"]
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.ruff.lint.isort]
+force-single-line = true
