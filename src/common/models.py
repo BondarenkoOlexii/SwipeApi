@@ -54,3 +54,9 @@ class NotificationChoice(str, enum.Enum):
     Me_And_Agent = "me_and_agent"
     Agent = "agent"
     Off = "off"
+
+
+class RepairUserChoice(str, enum.Enum):
+    Non = "none"
+    Rough = "rough"
+    Full_fledged = "full_fledged"

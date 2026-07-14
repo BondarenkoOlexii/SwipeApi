@@ -28,8 +28,12 @@ class Apartment(Base):
     price: Mapped[float] = mapped_column()
     is_actual: Mapped[bool] = mapped_column()
 
-   image_associations: Mapped[list["ApartmentImageAssociation"]] = \
-   relationship("ApartmentImageAssociation", back_populates="apartment", cascade="all, delete-orphan", lazy="selection")
+    image_associations: Mapped[list["ApartmentImageAssociation"]] = relationship("ApartmentImageAssociation",
+                                                                                 back_populates="apartment",
+                                                                                 cascade="all, delete-orphan",
+                                                                                 lazy="selection")
+
+    favorites: Mapped[list["User"]] = relationship("User", secondary="favorite", back_populates="favorites")
 
 
 class DetailApartment(Base):
@@ -57,6 +61,8 @@ class DetailApartment(Base):
 
 
 class Advantages(Base):
+    __tablename__ = "advantages"
+
     apartment_id: Mapped[int] = mapped_column(ForeignKey('apartment.id', ondelete="CASCADE"), primary_key=True)
     apartment: Mapped["Apartment"] = relationship(back_populates="advantages")
 
