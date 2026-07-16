@@ -11,7 +11,7 @@ class ApartmentImageAssociation(Base):
         ForeignKey("apartment.id", ondelete="CASCADE"), primary_key=True
     )
     image_id: Mapped[int] = mapped_column(
-        ForeignKey("images.id", ondelete="CASCADE"), primary_key=True
+        ForeignKey("image.id", ondelete="CASCADE"), primary_key=True
     )
     display_type: Mapped[str] = mapped_column(String(50), default="gallery")
 
@@ -51,13 +51,13 @@ class DetailApartment(Base):
     layout: Mapped[str] = mapped_column(String(220), nullable=True)
     kitchen_area: Mapped[float] = mapped_column()
 
-    heating_type: Mapped[HeatingTypeChoice] = mapped_column(Enum(HeatingTypeChoice, native_enum=False, length=10))
+    heating_type: Mapped[HeatingTypeChoice] = mapped_column(Enum(HeatingTypeChoice, native_enum=False))
     balcony: Mapped[bool] = mapped_column()
     mortgage: Mapped[bool] = mapped_column()
     agent_commission: Mapped[bool] = mapped_column(nullable=True)
     state: Mapped[str] = mapped_column(String(220))
 
-    communication: Mapped[CommunicationChoice] = mapped_column(Enum(CommunicationChoice, native_enum=False, length=10))
+    communication: Mapped[CommunicationChoice] = mapped_column(Enum(CommunicationChoice, native_enum=False))
 
 
 class Advantages(Base):

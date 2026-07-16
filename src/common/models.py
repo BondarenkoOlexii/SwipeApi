@@ -11,6 +11,8 @@ class Base(DeclarativeBase):
 
 
 class Image(Base):
+    __tablename__ = "image"
+
     id = Column(Integer, primary_key=True)
     filepath = Column(String(150))
 

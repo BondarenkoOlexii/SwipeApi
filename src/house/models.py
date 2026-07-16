@@ -48,7 +48,7 @@ class Section(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
 
     corps_id: Mapped[int] = mapped_column(
-        ForeignKey("house_storey.id", ondelete="CASCADE")
+        ForeignKey("house_corps.id", ondelete="CASCADE")
     )
     corps: Mapped[list["Corps"]] = relationship(back_populates="corps_section")
 
@@ -105,6 +105,8 @@ class News(Base):
 
 
 class Communication(Base):
+    __tablename__ = "communication"
+
     id: Mapped[int] = mapped_column(primary_key=True)
     house_id: Mapped[int] = mapped_column(ForeignKey("house.id", ondelete="CASCADE"))
     house: Mapped["House"] = relationship(back_populates="communication")
@@ -119,6 +121,8 @@ class Communication(Base):
 
 
 class Registration(Base):
+    __tablename__ = "registration"
+
     id: Mapped[int] = mapped_column(primary_key=True)
     house_id: Mapped[int] = mapped_column(ForeignKey("house.id", ondelete="CASCADE"))
     house: Mapped["House"] = relationship(back_populates="registration")
@@ -132,6 +136,8 @@ class Registration(Base):
 
 
 class CalculationVariant(Base):
+    __tablename__ = "calculation_variant"
+
     id: Mapped[int] = mapped_column(primary_key=True)
     registration_id: Mapped[int] = mapped_column(
         ForeignKey("registration.id", ondelete="CASCADE")

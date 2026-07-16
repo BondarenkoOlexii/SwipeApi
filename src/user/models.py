@@ -15,7 +15,7 @@ class UserImageAssociation(Base):
         ForeignKey("user.id", ondelete="CASCADE"), primary_key=True
     )
     image_id: Mapped[int] = mapped_column(
-        ForeignKey("images.id", ondelete="CASCADE"), primary_key=True
+        ForeignKey("image.id", ondelete="CASCADE"), primary_key=True
     )
     display_type: Mapped[str] = mapped_column(String(50), default="gallery")
 
