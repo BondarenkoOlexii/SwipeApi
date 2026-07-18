@@ -1,11 +1,20 @@
-from sqlalchemy import Enum, String, ForeignKey, DateTime, func, Numeric
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from datetime import datetime
 from decimal import Decimal
 
-from src.common.models import Base, Image
-from src.common.models import NotificationChoice, RepairUserChoice
+from sqlalchemy import DateTime
+from sqlalchemy import Enum
+from sqlalchemy import ForeignKey
+from sqlalchemy import Numeric
+from sqlalchemy import String
+from sqlalchemy import func
+from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import relationship
+
+from src.common.models import Base
+from src.common.models import Image
+from src.common.models import NotificationChoice
+from src.common.models import RepairUserChoice
 
 
 class UserImageAssociation(Base):
@@ -36,25 +45,33 @@ class User(Base):
     notification: Mapped["NotificationChoice"] = mapped_column(
         Enum(NotificationChoice, native_enum=False)
     )
-    favorites: Mapped[list["Apartment"]] = relationship("Apartment", secondary="favorite", back_populates="favorites_by")
+    favorites: Mapped[list["Apartment"]] = relationship(
+        "Apartment", secondary="favorite", back_populates="favorites_by"
+    )
 
 
 class Subscription(Base):
     __tablename__ = "subscription"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey('user.id', ondelete="CASCADE"), primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("user.id", ondelete="CASCADE"), primary_key=True
+    )
     user: Mapped["User"] = relationship(back_populates="subscription")
 
-    start_time: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
-    end_time: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
+    start_time: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=func.now()
+    )
+    end_time: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=func.now()
+    )
 
 
 class Filter(Base):
     __tablename__ = "filter"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey('user.id', ondelete="CASCADE"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id", ondelete="CASCADE"))
     user: Mapped["User"] = relationship(back_populates="filter")
 
     min_price: Mapped[Decimal] = mapped_column(Numeric(precision=10, scale=2))
@@ -66,16 +83,21 @@ class Filter(Base):
     min_area: Mapped[float] = mapped_column()
     max_area: Mapped[float] = mapped_column()
 
-    repair: Mapped["RepairUserChoice"] = mapped_column(Enum(RepairUserChoice, native_enum=False), default=RepairUserChoice.Non)
+    repair: Mapped["RepairUserChoice"] = mapped_column(
+        Enum(RepairUserChoice, native_enum=False), default=RepairUserChoice.Non
+    )
 
 
 class Favorite(Base):
     __tablename__ = "favorite"
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id", ondelete="CASCADE"), primary_key=True)
-    apartment_id: Mapped[int] = mapped_column(ForeignKey("apartment.id", ondelete="CASCADE"), primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("user.id", ondelete="CASCADE"), primary_key=True
+    )
+    apartment_id: Mapped[int] = mapped_column(
+        ForeignKey("apartment.id", ondelete="CASCADE"), primary_key=True
+    )
 
-    create_time: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
-
-
-
+    create_time: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=func.now()
+    )

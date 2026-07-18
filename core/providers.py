@@ -17,18 +17,16 @@ class RepoProvider(Provider):
     settings = from_context(provides=Settings, scope=Scope.APP)
 
     @provide(scope=Scope.APP)
-    def get_engine(self, settings: Settings) -> AsyncIterable:
-        return new_engine(settings.get_db_url)
+    async def get_engine(self, settings: Settings) -> AsyncIterable[AsyncEngine]:
+        engine = new_engine()
+        yield engine
+        await engine.dispose()
 
     @provide(scope=Scope.APP)
-    def get_session_marker(
-        self, engine: AsyncEngine
-    ) -> async_sessionmaker[AsyncSession]:
+    def get_session_marker(self, engine: AsyncEngine) -> async_sessionmaker[AsyncSession]:
         return new_session_maker(engine)
 
     @provide(scope=Scope.REQUEST)
-    async def get_session(
-        self, session_maker: async_sessionmaker[AsyncSession]
-    ) -> AsyncIterable[AsyncSession]:
+    async def get_session(self, session_maker: async_sessionmaker[AsyncSession]) -> AsyncIterable[AsyncSession]:
         async with session_maker() as session:
             yield session

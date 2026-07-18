@@ -1,23 +1,13 @@
 import asyncio
 from logging.config import fileConfig
 
+from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from alembic import context
-
 from core.config import settings
-
-from src.common.models import Image, Base
-from src.house.models import House, Corps, Section, Storey, Infrastructure, News, Communication, Registration,\
-    CalculationVariant
-
-from src.apartment.models import Apartment, DetailApartment, Advantages, ApartmentImageAssociation
-
-from src.user.models import User, UserImageAssociation, Subscription, Filter, Favorite
-
-
+from src.common.models import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -99,7 +89,6 @@ async def run_async_migrations() -> None:
 
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode."""
-
     asyncio.run(run_async_migrations())
 
 
