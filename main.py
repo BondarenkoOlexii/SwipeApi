@@ -43,10 +43,6 @@ def create_app() -> FastAPI:
 
     #app.include_router()
 
-    @app.get("/")
-    async def root():
-        return {"message": "Server Life Dishka also"}
-
     return app
 
 
