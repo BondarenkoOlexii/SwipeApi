@@ -8,7 +8,7 @@ class UserCreate(UserBase):
     password: str
 
 
-class UserResponce(UserBase):
+class UserResponse(UserBase):
     id: int
 
     class Config:
