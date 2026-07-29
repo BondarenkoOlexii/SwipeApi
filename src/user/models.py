@@ -1,7 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 
-from sqlalchemy import DateTime
+from sqlalchemy import DateTime, BigInteger
 from sqlalchemy import Enum
 from sqlalchemy import ForeignKey
 from sqlalchemy import Numeric
@@ -38,12 +38,15 @@ class User(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
 
     first_name: Mapped[str] = mapped_column(String(220))
-    last_name: Mapped[str] = mapped_column(String(220))
     email: Mapped[str] = mapped_column()
-    phone_number: Mapped[str] = mapped_column()
-    switching: Mapped[bool] = mapped_column()
+    hashed_password: Mapped[str | None] = mapped_column(String(225))
+
+    last_name: Mapped[str | None] = mapped_column(String(220))
+    tg_id: Mapped[int | None] = mapped_column(BigInteger)
+    phone_number: Mapped[str | None] = mapped_column()
+    switching: Mapped[bool | None] = mapped_column()
     notification: Mapped["NotificationChoice"] = mapped_column(
-        Enum(NotificationChoice, native_enum=False)
+        Enum(NotificationChoice, native_enum=False), default=NotificationChoice.Me
     )
     favorites: Mapped[list["Apartment"]] = relationship(
         "Apartment", secondary="favorite", back_populates="favorites_by"

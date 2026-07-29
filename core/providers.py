@@ -12,6 +12,8 @@ from .config import Settings
 from .database import new_engine
 from .database import new_session_maker
 
+from src.user.repositories import UserRepository
+
 
 class RepoProvider(Provider):
     settings = from_context(provides=Settings, scope=Scope.APP)
@@ -30,3 +32,9 @@ class RepoProvider(Provider):
     async def get_session(self, session_maker: async_sessionmaker[AsyncSession]) -> AsyncIterable[AsyncSession]:
         async with session_maker() as session:
             yield session
+
+
+class RepositoryProvider(Provider):
+    scope = Scope.REQUEST
+
+    user_repo = provide(UserRepository)
