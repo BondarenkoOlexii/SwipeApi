@@ -14,6 +14,10 @@ from core.config import Settings
 from core.providers import RepositoryProvider
 from src.user.router import router as user_router
 
+import src.apartment.models
+import src.house.models
+import src.user.models
+
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:

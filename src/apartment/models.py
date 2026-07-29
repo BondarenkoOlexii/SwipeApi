@@ -11,6 +11,10 @@ from src.common.models import CommunicationChoice
 from src.common.models import HeatingTypeChoice
 from src.common.models import Image
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.user.models import Favorite
 
 class ApartmentImageAssociation(Base):
     __tablename__ = "apartment_images"
@@ -40,12 +44,16 @@ class Apartment(Base):
         "ApartmentImageAssociation",
         back_populates="apartment",
         cascade="all, delete-orphan",
-        lazy="selection",
+        lazy="selectin",
     )
 
     favorites: Mapped[list["User"]] = relationship(
         "User", secondary="favorite", back_populates="favorites"
     )
+
+    detail: Mapped["DetailApartment"] = relationship(back_populates="apartment")
+
+    advantages: Mapped["Advantages"] = relationship(back_populates="apartment")
 
 
 class DetailApartment(Base):

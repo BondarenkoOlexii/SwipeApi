@@ -23,9 +23,14 @@ class House(Base):
     min_price: Mapped[float] = mapped_column()
     location: Mapped[str] = mapped_column()
 
-    corps: Mapped[list["Corps"]] = relationship(
+    house_corps: Mapped[list["Corps"]] = relationship(
         "Corps", back_populates="house", cascade="all, delete-orphan"
     )
+
+    infrastructure: Mapped["Infrastructure"] = relationship(back_populates="house")
+    news: Mapped["News"] = relationship(back_populates="house")
+    communication: Mapped["Communication"] = relationship(back_populates="house")
+    registration: Mapped["Registration"] = relationship(back_populates="house")
 
 
 class Corps(Base):
@@ -50,12 +55,12 @@ class Section(Base):
     corps_id: Mapped[int] = mapped_column(
         ForeignKey("house_corps.id", ondelete="CASCADE")
     )
-    corps: Mapped[list["Corps"]] = relationship(back_populates="corps_section")
+    corps: Mapped["Corps"] = relationship(back_populates="sections")
 
     name: Mapped[str] = mapped_column()
 
     storey: Mapped[list["Storey"]] = relationship(
-        "Section", back_populates="corps", cascade="all, delete-orphan"
+        "Storey", back_populates="section", cascade="all, delete-orphan"
     )
 
 
@@ -67,7 +72,7 @@ class Storey(Base):
     section_id: Mapped[int] = mapped_column(
         ForeignKey("house_section.id", ondelete="CASCADE")
     )
-    section: Mapped[list["Section"]] = relationship(back_populates="storey")
+    section: Mapped["Section"] = relationship(back_populates="storey")
 
     name: Mapped[str] = mapped_column()
 
@@ -132,6 +137,10 @@ class Registration(Base):
     house_status: Mapped["HouseRegisterChoice"] = mapped_column(
         Enum(HouseRegisterChoice, native_enum=False),
         default=HouseRegisterChoice.Residential,
+    )
+
+    calculation_variant: Mapped[list["CalculationVariant"]] = relationship(
+        "CalculationVariant", back_populates="registration", cascade="all, delete-orphan"
     )
 
 

@@ -7,6 +7,7 @@ class UserBase(BaseModel):
     email: EmailStr
     first_name: str
 
+
     last_name: str | None = None
     tg_id: int | None = None
     phone_number: str | None = None
@@ -15,7 +16,7 @@ class UserBase(BaseModel):
 
 
 class UserCreate(UserBase):
-    password: str
+    hashed_password: str | None = None
 
 
 class UserResponse(UserBase):
@@ -25,4 +26,4 @@ class UserResponse(UserBase):
 
 class UserUpdate(UserBase):
     email: EmailStr | None = None
-    password: str | None = None
+    hashed_password: str | None = None

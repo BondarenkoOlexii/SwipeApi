@@ -8,10 +8,11 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from core.config import settings
 from src.common.models import Base
-
-from src.user.models import UserImageAssociation, User, Subscription, Filter, Favorite
 from src.house.models import House, Corps, Section, Storey, Infrastructure, News, Communication, Registration, CalculationVariant
 from src.apartment.models import ApartmentImageAssociation, Apartment, DetailApartment, Advantages
+from src.user.models import UserImageAssociation, User, Subscription, Filter, Favorite
+
+
 from src.common.models import Image, Base
 
 # this is the Alembic Config object, which provides

@@ -16,6 +16,12 @@ from src.common.models import Image
 from src.common.models import NotificationChoice
 from src.common.models import RepairUserChoice
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.apartment.models import Apartment
+
+
 
 class UserImageAssociation(Base):
     __tablename__ = "user_images"
@@ -29,7 +35,7 @@ class UserImageAssociation(Base):
     display_type: Mapped[str] = mapped_column(String(50), default="gallery")
 
     user: Mapped["User"] = relationship(back_populates="image_associations")
-    image: Mapped["Image"] = relationship(back_populates="user_associations")
+    image: Mapped["Image"] = relationship()
 
 
 class User(Base):
@@ -48,10 +54,14 @@ class User(Base):
     notification: Mapped["NotificationChoice"] = mapped_column(
         Enum(NotificationChoice, native_enum=False), default=NotificationChoice.Me
     )
-    favorites: Mapped[list["Apartment"]] = relationship(
-        "Apartment", secondary="favorite", back_populates="favorites_by"
-    )
+    favorites: Mapped[list["Apartment"]] = relationship("Apartment", secondary="favorite")
 
+    image_associations: Mapped[list["UserImageAssociation"]] = relationship(
+        "UserImageAssociation",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
 
 class Subscription(Base):
     __tablename__ = "subscription"
@@ -60,7 +70,7 @@ class Subscription(Base):
     user_id: Mapped[int] = mapped_column(
         ForeignKey("user.id", ondelete="CASCADE"), primary_key=True
     )
-    user: Mapped["User"] = relationship(back_populates="subscription")
+    user: Mapped["User"] = relationship()
 
     start_time: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=func.now()
@@ -75,7 +85,7 @@ class Filter(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id", ondelete="CASCADE"))
-    user: Mapped["User"] = relationship(back_populates="filter")
+    user: Mapped["User"] = relationship()
 
     min_price: Mapped[Decimal] = mapped_column(Numeric(precision=10, scale=2))
     max_price: Mapped[Decimal] = mapped_column(Numeric(precision=10, scale=2))
