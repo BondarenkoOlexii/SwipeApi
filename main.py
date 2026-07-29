@@ -11,6 +11,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from core.providers import RepoProvider
 from core.config import Settings
 
+from core.providers import RepositoryProvider
+from src.user.router import router as user_router
+
+import src.apartment.models
+import src.house.models
+import src.user.models
+
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
@@ -38,10 +45,10 @@ def create_app() -> FastAPI:
     )
 
     settings = Settings()
-    container: AsyncContainer = make_async_container(RepoProvider(), context={Settings: settings})
+    container: AsyncContainer = make_async_container(RepoProvider(), RepositoryProvider(), context={Settings: settings})
     setup_dishka(container, app)
 
-    #app.include_router()
+    app.include_router(user_router)
 
     return app
 

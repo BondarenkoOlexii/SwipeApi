@@ -6,7 +6,7 @@ from core.config import settings
 
 
 def new_engine():
-    return create_async_engine(settings.database_url, echo=True)
+    return create_async_engine(settings.get_db_url(), echo=True)
 
 
 def new_session_maker(engine):
