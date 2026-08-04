@@ -1,4 +1,6 @@
-from pydantic import BaseModel, EmailStr, ConfigDict
+from pydantic import BaseModel
+from pydantic import ConfigDict
+from pydantic import EmailStr
 
 from src.common.models import NotificationChoice
 
@@ -6,7 +8,6 @@ from src.common.models import NotificationChoice
 class UserBase(BaseModel):
     email: EmailStr
     first_name: str
-
 
     last_name: str | None = None
     tg_id: int | None = None

@@ -11,10 +11,6 @@ from src.common.models import CommunicationChoice
 from src.common.models import HeatingTypeChoice
 from src.common.models import Image
 
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from src.user.models import Favorite
 
 class ApartmentImageAssociation(Base):
     __tablename__ = "apartment_images"

@@ -1,22 +1,19 @@
-from fastapi import Depends, FastAPI
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 import uvicorn
-import structlog
-from dishka import make_async_container, AsyncContainer
+from dishka import AsyncContainer
+from dishka import make_async_container
 from dishka.integrations.fastapi import setup_dishka
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from core.providers import RepoProvider
 from core.config import Settings
-
+from core.providers import RepoProvider
 from core.providers import RepositoryProvider
 from src.user.router import router as user_router
 
-import src.apartment.models
-import src.house.models
-import src.user.models
+import src.common.registry
 
 
 @asynccontextmanager
@@ -27,11 +24,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 
 
 def create_app() -> FastAPI:
-
-    app = FastAPI(
-        title="Title",
-        lifespan=lifespan
-    )
+    app = FastAPI(title="Title", lifespan=lifespan)
 
     app.add_middleware(
         CORSMiddleware,
@@ -41,11 +34,13 @@ def create_app() -> FastAPI:
         ],
         allow_credentials=True,
         allow_methods=["*"],
-        allow_headers=["*"]
+        allow_headers=["*"],
     )
 
     settings = Settings()
-    container: AsyncContainer = make_async_container(RepoProvider(), RepositoryProvider(), context={Settings: settings})
+    container: AsyncContainer = make_async_container(
+        RepoProvider(), RepositoryProvider(), context={Settings: settings}
+    )
     setup_dishka(container, app)
 
     app.include_router(user_router)

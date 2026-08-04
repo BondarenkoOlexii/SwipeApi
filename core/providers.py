@@ -13,6 +13,7 @@ from .database import new_engine
 from .database import new_session_maker
 
 from src.user.repositories import UserRepository
+from src.user.services import UserService
 
 
 class RepoProvider(Provider):
@@ -38,3 +39,4 @@ class RepositoryProvider(Provider):
     scope = Scope.REQUEST
 
     user_repo = provide(UserRepository)
+    user_service = provide(UserService)

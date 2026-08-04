@@ -140,7 +140,9 @@ class Registration(Base):
     )
 
     calculation_variant: Mapped[list["CalculationVariant"]] = relationship(
-        "CalculationVariant", back_populates="registration", cascade="all, delete-orphan"
+        "CalculationVariant",
+        back_populates="registration",
+        cascade="all, delete-orphan",
     )
 
 

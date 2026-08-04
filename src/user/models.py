@@ -1,7 +1,8 @@
 from datetime import datetime
 from decimal import Decimal
 
-from sqlalchemy import DateTime, BigInteger
+from sqlalchemy import BigInteger
+from sqlalchemy import DateTime
 from sqlalchemy import Enum
 from sqlalchemy import ForeignKey
 from sqlalchemy import Numeric
@@ -15,11 +16,6 @@ from src.common.models import Base
 from src.common.models import Image
 from src.common.models import NotificationChoice
 from src.common.models import RepairUserChoice
-
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from src.apartment.models import Apartment
 
 
 
@@ -54,7 +50,9 @@ class User(Base):
     notification: Mapped["NotificationChoice"] = mapped_column(
         Enum(NotificationChoice, native_enum=False), default=NotificationChoice.Me
     )
-    favorites: Mapped[list["Apartment"]] = relationship("Apartment", secondary="favorite")
+    favorites: Mapped[list["Apartment"]] = relationship(
+        "Apartment", secondary="favorite", back_populates="favorites"
+    )
 
     image_associations: Mapped[list["UserImageAssociation"]] = relationship(
         "UserImageAssociation",
@@ -62,6 +60,7 @@ class User(Base):
         cascade="all, delete-orphan",
         lazy="selectin",
     )
+
 
 class Subscription(Base):
     __tablename__ = "subscription"
