@@ -11,9 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from core.config import Settings
 from core.providers import RepoProvider
 from core.providers import RepositoryProvider
-from src.user.router import router as user_router
-
-import src.common.registry
+from src import router as user_router
 
 
 @asynccontextmanager

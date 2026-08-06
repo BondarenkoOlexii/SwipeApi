@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from pydantic import ConfigDict
 from pydantic import EmailStr
 
-from src.common.models import NotificationChoice
+from src import NotificationChoice
 
 
 class UserBase(BaseModel):

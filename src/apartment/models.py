@@ -6,10 +6,10 @@ from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
 
-from src.common.models import Base
-from src.common.models import CommunicationChoice
-from src.common.models import HeatingTypeChoice
-from src.common.models import Image
+from src import Base
+from src import CommunicationChoice
+from src import HeatingTypeChoice
+from src import Image
 
 
 class ApartmentImageAssociation(Base):

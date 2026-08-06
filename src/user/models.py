@@ -12,10 +12,10 @@ from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
 
-from src.common.models import Base
-from src.common.models import Image
-from src.common.models import NotificationChoice
-from src.common.models import RepairUserChoice
+from src import Base
+from src import Image
+from src import NotificationChoice
+from src import RepairUserChoice
 
 
 
