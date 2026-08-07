@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from pydantic import ConfigDict
 from pydantic import EmailStr
 
-from src import NotificationChoice
+from src.common.models import NotificationChoice
 
 
 class UserBase(BaseModel):
@@ -28,3 +28,7 @@ class UserResponse(UserBase):
 class UserUpdate(UserBase):
     email: EmailStr | None = None
     hashed_password: str | None = None
+
+
+class UserInDB(UserResponse):
+    hashed_password: str

@@ -12,10 +12,10 @@ from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
 
-from src import Base
-from src import Image
-from src import NotificationChoice
-from src import RepairUserChoice
+from src.common.models import Base
+from src.common.models import Image
+from src.common.models import NotificationChoice
+from src.common.models import RepairUserChoice
 
 
 
@@ -47,6 +47,7 @@ class User(Base):
     tg_id: Mapped[int | None] = mapped_column(BigInteger)
     phone_number: Mapped[str | None] = mapped_column()
     switching: Mapped[bool | None] = mapped_column()
+    refresh_token: Mapped[str | None] = mapped_column(String, nullable=True)
     notification: Mapped["NotificationChoice"] = mapped_column(
         Enum(NotificationChoice, native_enum=False), default=NotificationChoice.Me
     )

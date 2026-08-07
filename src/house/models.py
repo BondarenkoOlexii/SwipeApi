@@ -6,10 +6,7 @@ from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
 
-from src import Base
-from src import HouseClassChoice
-from src import HouseHeatingChoice
-from src import HouseRegisterChoice
+from src.common.models import Base, HouseClassChoice, HouseHeatingChoice, HouseRegisterChoice
 
 
 class House(Base):

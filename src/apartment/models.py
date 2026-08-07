@@ -1,15 +1,7 @@
-from sqlalchemy import Enum
-from sqlalchemy import ForeignKey
-from sqlalchemy import String
-from sqlalchemy import Text
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
-from sqlalchemy.orm import relationship
+from sqlalchemy import Enum, ForeignKey, String, Text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src import Base
-from src import CommunicationChoice
-from src import HeatingTypeChoice
-from src import Image
+from src.common.models import Base, CommunicationChoice, HeatingTypeChoice, Image
 
 
 class ApartmentImageAssociation(Base):

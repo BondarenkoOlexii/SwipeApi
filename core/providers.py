@@ -12,8 +12,8 @@ from .config import Settings
 from .database import new_engine
 from .database import new_session_maker
 
-from src import UserRepository
-from src import UserService
+from src.user.repositories import UserRepository
+from src.user.services import UserService
 
 
 class RepoProvider(Provider):

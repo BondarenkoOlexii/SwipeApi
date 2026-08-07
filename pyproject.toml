@@ -91,3 +91,13 @@ line-ending = "auto"
 
 [tool.ruff.lint.isort]
 force-single-line = true
+
+[tool.ruff.lint]
+
+ignore = [
+    "I",
+    "F401",
+    "E402"
+
+
+]
