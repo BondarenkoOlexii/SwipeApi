@@ -47,3 +47,12 @@ def decode_access_token(token: str) -> dict:
         return payload
     except JWTError:
         return None
+
+
+# def refresh_token_state(token: str) -> dict:
+#     try:
+#         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+#     except JWTError as ex:
+#         raise None
+#
+#     return

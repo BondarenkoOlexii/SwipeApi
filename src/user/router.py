@@ -24,5 +24,5 @@ async def get_user(service: FromDishka[UserService], user_id: int):
 
 @router.post("/create_user", response_model=UserCreate)
 @inject
-async def create_user(user_in: UserCreate, repo: FromDishka[UserRepository]):
-    return await repo.create_user(user_in=user_in)
+async def create_user(user_in: UserCreate, repo: FromDishka[UserService]):
+    return await repo.register_user(email=user_in.email, password=user_in.password)

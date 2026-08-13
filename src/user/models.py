@@ -40,7 +40,7 @@ class User(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
 
     first_name: Mapped[str] = mapped_column(String(220))
-    email: Mapped[str] = mapped_column()
+    email: Mapped[str | None] = mapped_column()
     hashed_password: Mapped[str | None] = mapped_column(String(225))
 
     last_name: Mapped[str | None] = mapped_column(String(220))
