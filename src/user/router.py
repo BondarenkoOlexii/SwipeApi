@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException, status
 from dishka.integrations.fastapi import FromDishka, inject
 
 from .repositories import UserRepository
-from .schemas import UserCreate, UserUpdate, UserResponse
+from .schemas import UserCreate, UserUpdate, UserResponse,
 from .services import UserService
 
 

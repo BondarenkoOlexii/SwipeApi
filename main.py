@@ -11,8 +11,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from core.config import Settings
 from core.providers import RepoProvider
 from core.providers import RepositoryProvider
-from src import router as user_router
-
+from src.user.router import router as user_router
+from src.authorization.router import router as auth_router
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
@@ -42,6 +42,7 @@ def create_app() -> FastAPI:
     setup_dishka(container, app)
 
     app.include_router(user_router)
+    app.include_router(auth_router)
 
     return app
 

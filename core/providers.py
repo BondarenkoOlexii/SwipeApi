@@ -14,6 +14,7 @@ from .database import new_session_maker
 
 from src.user.repositories import UserRepository
 from src.user.services import UserService
+from src.authorization.services import AuthorizationService
 
 
 class RepoProvider(Provider):
@@ -40,3 +41,4 @@ class RepositoryProvider(Provider):
 
     user_repo = provide(UserRepository)
     user_service = provide(UserService)
+    auth_service = provide(AuthorizationService)

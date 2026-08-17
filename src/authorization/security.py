@@ -1,11 +1,18 @@
 from datetime import datetime, timedelta, timezone
 from passlib.context import CryptContext
 from jose import jwt, JWTError
-from core.config import Settings
+from fastapi import HTTPException, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from dishka.integrations.fastapi import FromDishka
+from src.user.repositories import UserRepository
+from dishka.integrations.fastapi import FromDishka
 
+
+from core.config import Settings
 from core.config import settings
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+http_bearer = HTTPBearer()
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -44,15 +51,22 @@ def decode_access_token(token: str) -> dict:
             settings.SECRET_KEY,
             algorithms=[settings.ALGORITHM]
         )
+
         return payload
     except JWTError:
-        return None
+        raise HTTPException(status_code=401, detail="Токен не валідний")
 
 
-# def refresh_token_state(token: str) -> dict:
-#     try:
-#         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-#     except JWTError as ex:
-#         raise None
-#
-#     return
+async def token_check(credentials: HTTPAuthorizationCredentials = Depends(http_bearer),
+                      repositories: FromDishka[UserRepository] = None):
+    token = credentials.credentials
+
+    id = decode_access_token(token).get("sub")
+
+    if id:
+        user = await repositories.get_user(id)
+        return user
+    else:
+        raise HTTPException(status_code=401, detail=f"User diactivate")
+
+

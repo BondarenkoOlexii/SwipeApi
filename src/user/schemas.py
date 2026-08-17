@@ -7,7 +7,7 @@ from src.common.models import NotificationChoice
 
 class UserBase(BaseModel):
     email: EmailStr
-    first_name: str
+    first_name: str | None = None
 
     last_name: str | None = None
     tg_id: int | None = None
@@ -16,8 +16,13 @@ class UserBase(BaseModel):
     notification: NotificationChoice | None = None
 
 
+class UserLogin(BaseModel):
+    email: EmailStr
+    hashed_password: str
+
+
 class UserCreate(UserBase):
-    password: str | None = None
+    password: str
 
 
 class UserResponse(UserBase):
