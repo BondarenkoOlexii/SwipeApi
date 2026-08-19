@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 from datetime import datetime
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
 from sqlalchemy import BigInteger
 from sqlalchemy import DateTime
@@ -17,6 +20,8 @@ from src.common.models import Image
 from src.common.models import NotificationChoice
 from src.common.models import RepairUserChoice
 
+if TYPE_CHECKING:
+    from src.apartment.models import Apartment
 
 
 class UserImageAssociation(Base):
@@ -30,8 +35,8 @@ class UserImageAssociation(Base):
     )
     display_type: Mapped[str] = mapped_column(String(50), default="gallery")
 
-    user: Mapped["User"] = relationship(back_populates="image_associations")
-    image: Mapped["Image"] = relationship()
+    user: Mapped[User] = relationship(back_populates="image_associations")
+    image: Mapped[Image] = relationship()
 
 
 class User(Base):
@@ -39,7 +44,7 @@ class User(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    first_name: Mapped[str] = mapped_column(String(220))
+    first_name: Mapped[str | None] = mapped_column(String(220))
     email: Mapped[str | None] = mapped_column()
     hashed_password: Mapped[str | None] = mapped_column(String(225))
 
@@ -48,14 +53,14 @@ class User(Base):
     phone_number: Mapped[str | None] = mapped_column()
     switching: Mapped[bool | None] = mapped_column()
     refresh_token: Mapped[str | None] = mapped_column(String, nullable=True)
-    notification: Mapped["NotificationChoice"] = mapped_column(
+    notification: Mapped[NotificationChoice] = mapped_column(
         Enum(NotificationChoice, native_enum=False), default=NotificationChoice.Me
     )
-    favorites: Mapped[list["Apartment"]] = relationship(
+    favorites: Mapped[list[Apartment]] = relationship(
         "Apartment", secondary="favorite", back_populates="favorites"
     )
 
-    image_associations: Mapped[list["UserImageAssociation"]] = relationship(
+    image_associations: Mapped[list[UserImageAssociation]] = relationship(
         "UserImageAssociation",
         back_populates="user",
         cascade="all, delete-orphan",
@@ -70,7 +75,7 @@ class Subscription(Base):
     user_id: Mapped[int] = mapped_column(
         ForeignKey("user.id", ondelete="CASCADE"), primary_key=True
     )
-    user: Mapped["User"] = relationship()
+    user: Mapped[User] = relationship()
 
     start_time: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=func.now()
@@ -85,7 +90,7 @@ class Filter(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id", ondelete="CASCADE"))
-    user: Mapped["User"] = relationship()
+    user: Mapped[User] = relationship()
 
     min_price: Mapped[Decimal] = mapped_column(Numeric(precision=10, scale=2))
     max_price: Mapped[Decimal] = mapped_column(Numeric(precision=10, scale=2))
@@ -96,7 +101,7 @@ class Filter(Base):
     min_area: Mapped[float] = mapped_column()
     max_area: Mapped[float] = mapped_column()
 
-    repair: Mapped["RepairUserChoice"] = mapped_column(
+    repair: Mapped[RepairUserChoice] = mapped_column(
         Enum(RepairUserChoice, native_enum=False), default=RepairUserChoice.Non
     )
 

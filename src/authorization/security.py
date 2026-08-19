@@ -1,15 +1,18 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC
+from datetime import datetime
+from datetime import timedelta
+
+from dishka.integrations.fastapi import FromDishka
+from fastapi import Depends
+from fastapi import HTTPException
+from fastapi.security import HTTPAuthorizationCredentials
+from fastapi.security import HTTPBearer
+from jose import JWTError
+from jose import jwt
 from passlib.context import CryptContext
-from jose import jwt, JWTError
-from fastapi import HTTPException, Depends
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from dishka.integrations.fastapi import FromDishka
-from src.user.repositories import UserRepository
-from dishka.integrations.fastapi import FromDishka
 
-
-from core.config import Settings
 from core.config import settings
+from src.user.repositories import UserRepository
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 http_bearer = HTTPBearer()
@@ -25,40 +28,40 @@ def get_password_hash(password: str) -> str:
 
 def create_access_token(data: dict) -> str:
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire = datetime.now(UTC) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(
-        to_encode,
-        settings.SECRET_KEY,
-        algorithm=settings.ALGORITHM
+        to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM
     )
     return encoded_jwt
 
 
 def create_refresh_token(data: dict) -> str:
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+    expire = datetime.now(UTC) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
 
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    encoded_jwt = jwt.encode(
+        to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM
+    )
     return encoded_jwt
 
 
 def decode_access_token(token: str) -> dict:
     try:
         payload = jwt.decode(
-            token,
-            settings.SECRET_KEY,
-            algorithms=[settings.ALGORITHM]
+            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
         )
 
         return payload
     except JWTError:
-        raise HTTPException(status_code=401, detail="Токен не валідний")
+        raise HTTPException(status_code=401, detail="Токен не валідний") from None
 
 
-async def token_check(credentials: HTTPAuthorizationCredentials = Depends(http_bearer),
-                      repositories: FromDishka[UserRepository] = None):
+async def token_check(
+    credentials: HTTPAuthorizationCredentials = Depends(http_bearer),
+    repositories: FromDishka[UserRepository] = None,
+):
     token = credentials.credentials
 
     id = decode_access_token(token).get("sub")
@@ -67,6 +70,4 @@ async def token_check(credentials: HTTPAuthorizationCredentials = Depends(http_b
         user = await repositories.get_user(id)
         return user
     else:
-        raise HTTPException(status_code=401, detail=f"User diactivate")
-
-
+        raise HTTPException(status_code=401, detail="User diactivate")

@@ -11,14 +11,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from core.config import Settings
 from core.providers import RepoProvider
 from core.providers import RepositoryProvider
-from src.user.router import router as user_router
 from src.authorization.router import router as auth_router
+from src.user.router import router as user_router
+
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-    print("Все стартануло")
+    print("Project starts")
     yield
-    print("Все зупинилось")
+    print("Project end")
 
 
 def create_app() -> FastAPI:

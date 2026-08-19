@@ -1,9 +1,10 @@
-from sqlalchemy import select, update
+from sqlalchemy import select
+from sqlalchemy import update
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .models import User
-from .schemas import UserCreate, UserUpdate
+from .schemas import UserUpdate
 
 
 class UserRepository:
@@ -25,7 +26,7 @@ class UserRepository:
         return result.scalar_one_or_none()
 
     async def create_user(self, user_data: dict) -> User:
-        user = User(**user_data.model_dump())
+        user = User(**user_data)
         self.session.add(user)
         await self.session.commit()
         await self.session.refresh(user)
@@ -47,10 +48,10 @@ class UserRepository:
         await self.session.commit()
         return user
 
-    async def update_refresh_token(self, token: str | None, user_id: int) -> User | None:
+    async def update_refresh_token(self, token: str | None, user_id: int) -> User:
         stmt = update(User).where(User.id == user_id).values(refresh_token=token)
-        result = await self.session.execute(stmt)
-        return result.session.commit()
+        await self.session.execute(stmt)
+        await self.session.commit()
 
     async def get_user_by_refresh_token(self, token: str) -> User | None:
         stmt = select(User).where(User.refresh_token == token)

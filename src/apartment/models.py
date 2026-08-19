@@ -1,7 +1,22 @@
-from sqlalchemy import Enum, ForeignKey, String, Text
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from __future__ import annotations
 
-from src.common.models import Base, CommunicationChoice, HeatingTypeChoice, Image
+from typing import TYPE_CHECKING
+
+from sqlalchemy import Enum
+from sqlalchemy import ForeignKey
+from sqlalchemy import String
+from sqlalchemy import Text
+from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import relationship
+
+from src.common.models import Base
+from src.common.models import CommunicationChoice
+from src.common.models import HeatingTypeChoice
+from src.common.models import Image
+
+if TYPE_CHECKING:
+    from src.user.models import User
 
 
 class ApartmentImageAssociation(Base):
@@ -15,8 +30,8 @@ class ApartmentImageAssociation(Base):
     )
     display_type: Mapped[str] = mapped_column(String(50), default="gallery")
 
-    apartment: Mapped["Apartment"] = relationship(back_populates="image_associations")
-    image: Mapped["Image"] = relationship()
+    apartment: Mapped[Apartment] = relationship(back_populates="image_associations")
+    image: Mapped[Image] = relationship()
 
 
 class Apartment(Base):
@@ -28,20 +43,20 @@ class Apartment(Base):
     price: Mapped[float] = mapped_column()
     is_actual: Mapped[bool] = mapped_column()
 
-    image_associations: Mapped[list["ApartmentImageAssociation"]] = relationship(
+    image_associations: Mapped[list[ApartmentImageAssociation]] = relationship(
         "ApartmentImageAssociation",
         back_populates="apartment",
         cascade="all, delete-orphan",
         lazy="selectin",
     )
 
-    favorites: Mapped[list["User"]] = relationship(
+    favorites: Mapped[list[User]] = relationship(
         "User", secondary="favorite", back_populates="favorites"
     )
 
-    detail: Mapped["DetailApartment"] = relationship(back_populates="apartment")
+    detail: Mapped[DetailApartment] = relationship(back_populates="apartment")
 
-    advantages: Mapped["Advantages"] = relationship(back_populates="apartment")
+    advantages: Mapped[Advantages] = relationship(back_populates="apartment")
 
 
 class DetailApartment(Base):
@@ -50,7 +65,7 @@ class DetailApartment(Base):
     apartment_id: Mapped[int] = mapped_column(
         ForeignKey("apartment.id", ondelete="CASCADE"), primary_key=True
     )
-    apartment: Mapped["Apartment"] = relationship(back_populates="detail")
+    apartment: Mapped[Apartment] = relationship(back_populates="detail")
 
     description: Mapped[str] = mapped_column(Text, nullable=True)
     type: Mapped[str] = mapped_column(String(220), nullable=True)
@@ -80,7 +95,7 @@ class Advantages(Base):
     apartment_id: Mapped[int] = mapped_column(
         ForeignKey("apartment.id", ondelete="CASCADE"), primary_key=True
     )
-    apartment: Mapped["Apartment"] = relationship(back_populates="advantages")
+    apartment: Mapped[Apartment] = relationship(back_populates="advantages")
 
     advantage_1: Mapped[bool] = mapped_column()
     advantage_2: Mapped[bool] = mapped_column()

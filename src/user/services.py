@@ -1,7 +1,7 @@
-from fastapi import HTTPException, status
-from src.authorization.security import get_password_hash, create_access_token, create_refresh_token, verify_password
+from fastapi import HTTPException
+from fastapi import status
+
 from .repositories import UserRepository
-from .schemas import UserCreate
 
 
 class UserService:
@@ -14,4 +14,7 @@ class UserService:
         if user:
             return user
         else:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User with id - {user_id} not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"User with id - {user_id} not found",
+            )
