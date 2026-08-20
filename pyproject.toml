@@ -52,6 +52,7 @@ exclude = [
     "build",
     "dist",
     "venv",
+    "migrations"
 ]
 line-length = 88
 indent-width = 4
@@ -60,34 +61,41 @@ target-version = "py312"
 [tool.ruff.lint]
 # Ми залишили ваш список правил, але прибрали "DJ" (Django)
 select = [
-  "F", "E", "W", "C90", "I", "N", "UP", "YTT",
-  "ASYNC", "D", "S", "BLE", "FBT", "B", "A", "COM",
-  "C4", "DTZ", "T10", "EM", "EXE", "FA", 'ISC',
-  "ICN", "G", 'INP', 'PIE', "T20", 'PYI', 'PT',
-  "Q", "RSE", "RET", "SLF", "SLOT", "SIM", "TID",
-  "TCH", "INT", "PTH", "ERA", "PD", "PGH", "PL",
-  "TRY", "FLY", "PERF", "RUF"
+    "F",    # Pyflakes (реальні помилки, невикористані імпорти)
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "I",    # isort
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear
+    "C4",   # flake8-comprehensions
+    "ASYNC",# flake8-async
+    "RUF",  # Ruff-specific rules
 ]
 ignore = [
-  "S101",    # Дозволяє використовувати assert (часто потрібен у тестах pytest)
-  "RUF012",  # Вимикає сувору вимогу ClassVar для Pydantic-моделей FastAPI
-  "SIM102",  # Дозволяє вкладені if, якщо так читається краще
-  "UP038",   # Вимикає оптимізацію isinstance, яка може сповільнювати код
-  "D203",    # Сумісність форматування docstring
-  "D213",    # Сумісність форматування docstring
-  "COM812",  # Сумісність із форматиром ruff-format
-  "ISC001"   # Сумісність із форматиром ruff-format
+    "S101",    # Дозволяє використовувати assert (часто потрібен у тестах pytest)
+    "RUF012",  # Вимикає сувору вимогу ClassVar для Pydantic-моделей FastAPI
+    "SIM102",  # Дозволяє вкладені if, якщо так читається краще
+    "UP038",   # Вимикає оптимізацію isinstance, яка може сповільнювати код
+    "B008",    # Дозволяє Depends(...) у FastAPI аргументах
+    "RUF001",  # Дозволяє кирилицю в рядках (принтах, текстах помилок)
+    "RUF012",  # Дозволяє мутабельні дефолти в Pydantic/SQLAlchemy
+    "E501",    # Довжина рядка (якщо розбиває форматер)
+    "RUF003",   # Українські букви
+    "RUF001",
+    "RUF002",
+    "RUF012",
+    "UP042"
 ]
 fixable = ["ALL"]
 unfixable = []
 extend-unsafe-fixes = ["UP038"]
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
+[tool.ruff.lint.isort]
+force-single-line = true
+
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "auto"
-
-[tool.ruff.lint.isort]
-force-single-line = true

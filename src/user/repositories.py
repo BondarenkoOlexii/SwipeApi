@@ -1,9 +1,10 @@
 from sqlalchemy import select
+from sqlalchemy import update
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .models import User
-from .schemas import UserCreate, UserUpdate
+from .schemas import UserUpdate
 
 
 class UserRepository:
@@ -19,8 +20,13 @@ class UserRepository:
     async def get_user(self, user_id: int) -> User | None:
         return await self.session.get(User, user_id)
 
-    async def create_user(self, user_in: UserCreate) -> User:
-        user = User(**user_in.model_dump())
+    async def get_user_by_email(self, email: str) -> User | None:
+        stmt = select(User).where(User.email == email)
+        result = await self.session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def create_user(self, user_data: dict) -> User:
+        user = User(**user_data)
         self.session.add(user)
         await self.session.commit()
         await self.session.refresh(user)
@@ -41,3 +47,13 @@ class UserRepository:
             setattr(user, key, value)
         await self.session.commit()
         return user
+
+    async def update_refresh_token(self, token: str | None, user_id: int) -> User:
+        stmt = update(User).where(User.id == user_id).values(refresh_token=token)
+        await self.session.execute(stmt)
+        await self.session.commit()
+
+    async def get_user_by_refresh_token(self, token: str) -> User | None:
+        stmt = select(User).where(User.refresh_token == token)
+        result = await self.session.execute(stmt)
+        return result.scalar_one_or_none()
