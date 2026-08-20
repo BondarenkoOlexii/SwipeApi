@@ -18,3 +18,6 @@ class UserService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"User with id - {user_id} not found",
             )
+
+    async def update_user(self, user_data: dict):
+        pass
