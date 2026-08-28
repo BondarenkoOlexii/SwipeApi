@@ -4,9 +4,12 @@ from dishka.integrations.fastapi import FromDishka
 from dishka.integrations.fastapi import inject
 from fastapi import APIRouter
 from fastapi import Depends
+from fastapi import UploadFile
 
 from src.authorization.dependencies import token_check
 
+from .models import User
+from .schemas import ProfileUpdate
 from .schemas import UserResponse
 from .services import UserService
 
@@ -25,7 +28,30 @@ async def get_user(service: FromDishka[UserService], user_id: int):
     return await service.get_user(user_id=user_id)
 
 
-@router.get("/profile", response_model=UserResponse)
+@router.get("/{user_id}/update", response_model=UserResponse)
 @inject
-async def get_profile(current_user: Annotated[str, Depends(token_check)]):
+async def get_profile(
+    data: ProfileUpdate, current_user: Annotated[str, Depends(token_check)]
+):
     return {"email": current_user.email, "id": current_user.id}
+
+
+@router.patch("/update")
+@inject
+async def update_profile(
+    user_schema: ProfileUpdate,
+    service: FromDishka[UserService],
+    current_user: Annotated[User, Depends(token_check)],
+) -> UserResponse:
+    updated_user = service.update_user(
+        user_id=current_user.id, user_data=user_schema.model_dump()
+    )
+    return updated_user
+
+
+@router.post("/update/avatar")
+@inject
+async def update_profile_avatar(
+    current_user: Annotated[User, Depends(token_check)], image: UploadFile
+):
+    pass
