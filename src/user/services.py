@@ -1,6 +1,10 @@
+import magic
 from fastapi import HTTPException
 from fastapi import UploadFile
 from fastapi import status
+
+from core.config import ALLOWED_TYPES
+from core.config import MAX_FILE_SIZE
 
 from .repositories import UserRepository
 
@@ -39,5 +43,21 @@ class UserService:
         updated_user = await self.update_user(user_data=user_data, user_id=user_id)
         return updated_user
 
-    async def get_profile_avatar(self, user_id: int, image: UploadFile):
-        pass
+    async def check_photo(self, file: UploadFile):
+        head = await file.read(2048)
+        await file.seek(0)
+        mime = magic.Magic(mime=True)
+
+        detected_type = mime.from_buffer(head)
+
+        return detected_type
+
+    async def update_profile_avatar(self, user_id: int, image: UploadFile, user: dict):
+        if image.size > MAX_FILE_SIZE:
+            raise HTTPException(400, detail="Дохуя важиш, давай щось поменше")
+
+        if image.content_type not in ALLOWED_TYPES:
+            raise HTTPException(400, detail="Та щось не той тип файлу")
+
+        if self.check_photo(image) not in ALLOWED_TYPES:
+            raise HTTPException(400, detail="ТИ чо мені скинув даун???")
