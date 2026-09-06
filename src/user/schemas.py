@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from pydantic import ConfigDict
 from pydantic import EmailStr
+from pydantic_extra_types.phone_numbers import PhoneNumber
 
 from src.common.models import NotificationChoice
 
@@ -11,7 +12,7 @@ class UserBase(BaseModel):
 
     last_name: str | None = None
     tg_id: int | None = None
-    phone_number: str | None = None
+    phone_number: PhoneNumber | None = None
     switching: bool | None = None
     notification: NotificationChoice | None = None
 
@@ -33,6 +34,16 @@ class UserResponse(UserBase):
 class UserUpdate(UserBase):
     email: EmailStr | None = None
     hashed_password: str | None = None
+
+
+class ProfileUpdate(BaseModel):
+    email: EmailStr | None = None
+    first_name: str | None = None
+    last_name: str | None = None
+    tg_id: int | None = None
+    phone_number: PhoneNumber | None = None
+    switching: bool | None = None
+    notification: NotificationChoice | None = None
 
 
 class UserInDB(UserResponse):

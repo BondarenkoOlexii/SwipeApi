@@ -1,10 +1,16 @@
+import uuid
+from pathlib import Path
+
+import aiofiles
+from fastapi import UploadFile
 from sqlalchemy import select
 from sqlalchemy import update
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from core.config import UPLOAD_DIR
+
 from .models import User
-from .schemas import UserUpdate
 
 
 class UserRepository:
@@ -25,6 +31,11 @@ class UserRepository:
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
+    async def get_user_by_tg_id(self, tg_id: int) -> User | None:
+        stmt = select(User).where(User.tg_id == tg_id)
+        result = await self.session.execute(stmt)
+        return result.scalar_one_or_none()
+
     async def create_user(self, user_data: dict) -> User:
         user = User(**user_data)
         self.session.add(user)
@@ -36,14 +47,8 @@ class UserRepository:
         await self.session.delete(user)
         await self.session.commit()
 
-    async def update_user(self, user_update: UserUpdate, user: User) -> User:
-        for key, value in user_update.model_dump().items():
-            setattr(user, key, value)
-        await self.session.commit()
-        return user
-
-    async def update_user_partial(self, user_update: UserUpdate, user: User) -> User:
-        for key, value in user_update.model_dump(exclude_unset=True).items():
+    async def update_user(self, user_update: dict, user: User) -> User:
+        for key, value in user_update.items():
             setattr(user, key, value)
         await self.session.commit()
         return user
@@ -57,3 +62,13 @@ class UserRepository:
         stmt = select(User).where(User.refresh_token == token)
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
+
+    async def upload_profile_image(self, file: UploadFile):
+        extencion = Path(file.filename or "").suffix.lower()
+        unique_name = f"{uuid.uuid4()}{extencion}"
+
+        destination = UPLOAD_DIR / unique_name
+
+        async with aiofiles.open(destination, "wb") as buffer:
+            while content := await file.read(1024 * 1024):
+                await buffer.write(content)

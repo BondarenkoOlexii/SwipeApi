@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings
 from pydantic_settings import SettingsConfigDict
 
@@ -25,3 +27,7 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
+ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp"}
+MAX_FILE_SIZE = 5 * 1024 * 1024
+UPLOAD_DIR = Path("media")
+CHUNK_SIZE = 1024 * 1024
