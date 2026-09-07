@@ -52,9 +52,11 @@ def decode_access_token(token: str) -> dict:
         payload = jwt.decode(
             token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
         )
+        print("PAYLOAD Успішний", payload)
 
         return payload
-    except JWTError:
+    except JWTError as e:
+        print(f"ПОМИЛКА ТОКЕНА {type(e).__name__} - {e}")
         raise HTTPException(status_code=401, detail="Токен не валідний") from None
 
 
