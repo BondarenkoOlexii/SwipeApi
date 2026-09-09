@@ -62,3 +62,10 @@ class RepairUserChoice(str, enum.Enum):
     Non = "none"
     Rough = "rough"
     Full_fledged = "full_fledged"
+
+
+class UserTypes(str, enum.Enum):
+    User = "user"
+    Developer = "developer"
+    Notary = "notary"
+    Agent = "agent"

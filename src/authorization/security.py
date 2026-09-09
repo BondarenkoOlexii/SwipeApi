@@ -70,6 +70,25 @@ async def token_check(
 
     if id:
         user = await repositories.get_user(id)
+
         return user
+    else:
+        raise HTTPException(status_code=401, detail="User diactivate")
+
+
+async def developer_token_check(
+    credentials: HTTPAuthorizationCredentials = Depends(http_bearer),
+    repositories: FromDishka[UserRepository] = None,
+):
+    token = credentials.credentials
+
+    id = decode_access_token(token).get("sub")
+
+    if id:
+        user = await repositories.get_user(id)
+        if user.user_type == "developer":
+            return user
+        else:
+            raise HTTPException(status_code=401, detail="User is not developer")
     else:
         raise HTTPException(status_code=401, detail="User diactivate")

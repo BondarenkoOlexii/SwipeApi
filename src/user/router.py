@@ -15,6 +15,7 @@ from .services import UserService
 
 router = APIRouter(prefix="/users", tags=["User"])
 
+
 @router.get("/profile", response_model=UserResponse)
 @inject
 async def get_user(service: FromDishka[UserService], user_id: int):

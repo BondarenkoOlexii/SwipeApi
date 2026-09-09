@@ -46,3 +46,15 @@ async def refresh_token(data: RefreshSchema, service: FromDishka[AuthorizationSe
     return TokenSchema(
         access_token=access_token, refresh_token=refresh_token, user=user
     )
+
+
+@router.post("/developer/register", response_model=TokenSchema)
+@inject
+async def register_developer():
+    pass
+
+
+@router.post("/developer/login", response_model=TokenSchema)
+@inject
+async def login_developer():
+    pass
