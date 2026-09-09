@@ -1,16 +1,13 @@
-import uuid
-from pathlib import Path
-
-import aiofiles
-from fastapi import UploadFile
 from sqlalchemy import select
 from sqlalchemy import update
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
-from core.config import UPLOAD_DIR
+from src.common.models import Image
 
 from .models import User
+from .models import UserImageAssociation
 
 
 class UserRepository:
@@ -63,12 +60,24 @@ class UserRepository:
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def upload_profile_image(self, file: UploadFile):
-        extencion = Path(file.filename or "").suffix.lower()
-        unique_name = f"{uuid.uuid4()}{extencion}"
+    async def upload_profile_image(
+        self, file: str, user_id: int, type: str
+    ) -> User:  # is_avatar: bool
+        new_image = Image(filepath=file)
+        user_image = UserImageAssociation(
+            user_id=user_id, image=new_image, display_type=type
+        )
 
-        destination = UPLOAD_DIR / unique_name
+        self.session.add(user_image)
+        await self.session.commit()
 
-        async with aiofiles.open(destination, "wb") as buffer:
-            while content := await file.read(1024 * 1024):
-                await buffer.write(content)
+    async def get_user_image(self, userid: int, ds_type: str):
+        stmt = (
+            select(UserImageAssociation)
+            .where(
+                UserImageAssociation.user_id == userid,
+                UserImageAssociation.display_type == ds_type,
+            )
+            .options(selectinload(UserImageAssociation.image.filepath))
+        )
+        return await self.session.scalar(stmt)

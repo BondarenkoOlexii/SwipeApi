@@ -6,4 +6,4 @@ __pycache__/
 
 migrations/versions
 
-.env
+src/common/registry.py

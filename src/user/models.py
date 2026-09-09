@@ -19,6 +19,7 @@ from src.common.models import Base
 from src.common.models import Image
 from src.common.models import NotificationChoice
 from src.common.models import RepairUserChoice
+from src.common.models import UserTypes
 
 if TYPE_CHECKING:
     from src.apartment.models import Apartment
@@ -53,9 +54,14 @@ class User(Base):
     phone_number: Mapped[str | None] = mapped_column()
     switching: Mapped[bool | None] = mapped_column()
     refresh_token: Mapped[str | None] = mapped_column(String, nullable=True)
+    user_type: Mapped[UserTypes] = mapped_column(
+        Enum(UserTypes, native_enum=False), default=UserTypes.User
+    )
+
     notification: Mapped[NotificationChoice] = mapped_column(
         Enum(NotificationChoice, native_enum=False), default=NotificationChoice.Me
     )
+
     favorites: Mapped[list[Apartment]] = relationship(
         "Apartment", secondary="favorite", back_populates="favorites"
     )
