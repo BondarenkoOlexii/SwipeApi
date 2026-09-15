@@ -19,10 +19,11 @@ class UserBase(BaseModel):
 
 class UserLogin(BaseModel):
     email: EmailStr
-    hashed_password: str
+    password: str
 
 
-class UserCreate(UserBase):
+class UserCreate(BaseModel):
+    email: EmailStr
     password: str
 
 

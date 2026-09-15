@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from sqlalchemy import Enum
 from sqlalchemy import ForeignKey
 from sqlalchemy import String
@@ -6,10 +8,22 @@ from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
 
-from src.common.models import Base
+from src.common.models import Base, Image
 from src.common.models import HouseClassChoice
 from src.common.models import HouseHeatingChoice
 from src.common.models import HouseRegisterChoice
+
+
+class HouseImageAssociation(Base):
+    __tablename__ = "house_association"
+
+    house_id: Mapped[int] = mapped_column(ForeignKey("house.id", ondelete="CASCADE"), primary_key=True)
+    image_id: Mapped[int] = mapped_column(ForeignKey("image.id", ondelete="CASCADE"), primary_key=True)
+
+    display_type: Mapped[str] = mapped_column(String(50), default="gallery")
+
+    house: Mapped[House] = relationship(back_populates="image_associations")
+    image: Mapped[Image] = relationship()
 
 
 class House(Base):
@@ -22,9 +36,17 @@ class House(Base):
     price_for_meter: Mapped[float] = mapped_column()
     min_price: Mapped[float] = mapped_column()
     location: Mapped[str] = mapped_column()
+    manager_id: Mapped[int] = mapped_column()
 
     house_corps: Mapped[list["Corps"]] = relationship(
         "Corps", back_populates="house", cascade="all, delete-orphan"
+    )
+
+    image_associations: Mapped[list[HouseImageAssociation]] = relationship(
+        "HouseImageAssociation",
+        back_populates="house",
+        cascade="all, delete-orphan",
+        lazy="selectin"
     )
 
     infrastructure: Mapped["Infrastructure"] = relationship(back_populates="house")

@@ -46,6 +46,31 @@ class AuthorizationService:
                 detail=f"This email - {email} is used",
             )
 
+    async def register_developer(self, email: str, password: str):
+        user = await self.repo.get_user_by_email(email)
+
+        if not user:
+            hashed_password = get_password_hash(password)
+
+            new_developer = await self.repo.create_user({
+                "email": email,
+                "hashed_password": hashed_password,
+                "user_type": UserTypes.Developer
+            })
+
+            refresh_token = create_refresh_token(
+                {"sub": str(new_developer.id), "role": str(new_developer.user_type)}
+            )
+            access_token = create_access_token(
+                {"sub": str(new_developer.id), "role": str(new_developer.user_type)}
+            )
+
+            await self.repo.update_refresh_token(token=refresh_token, user_id=new_developer.id)
+
+            return new_developer, access_token, refresh_token
+        else:
+            raise HTTPException(status_code=400, detail=f"This email - {email} is used")
+
     async def login_user(self, email: str, password: str):
         user = await self.repo.get_user_by_email(email=email)
 
@@ -61,8 +86,25 @@ class AuthorizationService:
 
             await self.repo.update_refresh_token(token=refresh_token, user_id=user.id)
 
-            return user, refresh_token, access_token
+            return user, access_token, refresh_token
 
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Your password is wrong",
+            )
+
+    async def login_developer(self, email: str, password: str):
+        developer = await self.repo.get_user_by_email(email=email)
+
+        if developer and verify_password(plain_password=password, hashed_password=developer.hashed_password):
+
+            refresh_token = create_refresh_token({"sub": str(developer.id), "role": str(developer.user_type)})
+
+            access_token = create_access_token( {"sub": str(developer.id), "role": str(developer.user_type)})
+
+            await self.repo.update_refresh_token(token=refresh_token, user_id=developer.id)
+            return developer, access_token, refresh_token
         else:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
