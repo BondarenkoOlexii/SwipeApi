@@ -1,4 +1,5 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
+from pydantic import ConfigDict
 
 
 class CreateHouse(BaseModel):
@@ -16,6 +17,7 @@ class GetHouse(CreateHouse):
 
 
 class UpdateHouse(BaseModel):
+    id: int
     address: str | None = None
     name: str | None = None
     area: str | None = None
@@ -23,3 +25,6 @@ class UpdateHouse(BaseModel):
     min_price: float | None = None
     price_for_meter: float | None = None
 
+
+class DeleteHouse(BaseModel):
+    id: int
