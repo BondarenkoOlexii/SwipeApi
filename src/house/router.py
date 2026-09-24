@@ -4,6 +4,7 @@ from dishka.integrations.fastapi import FromDishka
 from dishka.integrations.fastapi import inject
 from fastapi import APIRouter
 from fastapi import Depends
+from fastapi import UploadFile
 
 from src.authorization.dependencies import token_check
 from src.user.models import User
@@ -57,3 +58,13 @@ async def delete_house(
     house_id: DeleteHouse,
 ):
     return await service.delete_house(manager_id=current_user.id, house_id=house_id.id)
+
+
+@router.post("/upload/files")
+@inject
+async def upload_files(
+    files: list[UploadFile],
+    service: FromDishka[HouseService],
+    current_user: Annotated[User, Depends(token_check)],
+):
+    return await service.upload_images(house_id=current_user.id, images=files)

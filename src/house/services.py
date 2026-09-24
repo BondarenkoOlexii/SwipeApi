@@ -1,5 +1,7 @@
 from fastapi import HTTPException
+from fastapi import UploadFile
 
+from src.common.models import ImageTypeChoice
 from src.common.models import UserTypes
 from src.common.storage import StorageFile
 from src.user.repositories import UserRepository
@@ -57,3 +59,27 @@ class HouseService:
         new_house = await self.repo.update_house(house=house, data=house_data)
 
         return new_house
+
+    async def upload_images(self, house_id: int, images: list[UploadFile]):
+        images_list = []
+
+        for image in images:
+            check_image = self.storage.audit_photo(file=image)
+
+            house_image = self.repo.get_house_images(house_id)
+
+            if house_image:
+                await self.storage.delete_file(check_image)
+
+                new_image = await self.storage.download_file(image)
+
+            else:
+                new_image = await self.storage.download_file(image)
+
+            uploaded_image = await self.repo.upload_file(
+                house_id=house_id, file=new_image, type=ImageTypeChoice.Gallery
+            )
+
+            images_list.append(uploaded_image)
+
+        return images_list

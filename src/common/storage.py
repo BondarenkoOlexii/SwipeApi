@@ -6,7 +6,9 @@ import aiofiles.os
 from fastapi import UploadFile
 from magic import magic
 
+from core.config import ALLOWED_TYPES
 from core.config import CHUNK_SIZE
+from core.config import MAX_FILE_SIZE
 from core.config import UPLOAD_DIR
 
 
@@ -24,6 +26,16 @@ class StorageFile:
         detected_type = mime.from_buffer(head)
 
         return detected_type
+
+    async def audit_photo(self, file: UploadFile):
+        if file.size > MAX_FILE_SIZE:
+            return None
+        if (
+            file.content_type not in ALLOWED_TYPES
+            and self.check_photo(file) not in ALLOWED_TYPES
+        ):
+            return None
+        return file
 
     async def download_file(self, file: UploadFile):
         extension = Path(file.filename or "").suffix.lower()

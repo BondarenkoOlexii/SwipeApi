@@ -28,3 +28,16 @@ class UpdateHouse(BaseModel):
 
 class DeleteHouse(BaseModel):
     id: int
+
+
+class CreateCorpSectStor(BaseModel):
+    name: str
+
+
+class GetCorpSectStor(CreateCorpSectStor):
+    id: int
+    model_config = ConfigDict(from_attributes=True)
+
+
+class UpdateCorpSectStor(BaseModel):
+    name: str | None = None

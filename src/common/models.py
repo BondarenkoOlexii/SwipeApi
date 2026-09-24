@@ -17,6 +17,12 @@ class Image(Base):
     filepath = Column(String(150))
 
 
+class ImageTypeChoice(str, enum.Enum):
+    Gallery = "gallery"
+    Avatar = "avatar"
+    Schema = "schema"
+
+
 class HouseStatusChoice(str, enum.Enum):
     Passed = "passed"
     Construction = "сonstruction"

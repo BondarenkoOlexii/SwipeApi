@@ -71,11 +71,11 @@ class UserRepository:
         self.session.add(user_image)
         await self.session.commit()
 
-    async def get_user_image(self, userid: int, ds_type: str):
+    async def get_user_image(self, user_id: int, ds_type: str):
         stmt = (
             select(UserImageAssociation)
             .where(
-                UserImageAssociation.user_id == userid,
+                UserImageAssociation.user_id == user_id,
                 UserImageAssociation.display_type == ds_type,
             )
             .options(selectinload(UserImageAssociation.image.filepath))

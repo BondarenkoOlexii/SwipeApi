@@ -12,6 +12,7 @@ from core.config import Settings
 from core.providers import RepoProvider
 from core.providers import RepositoryProvider
 from src.authorization.router import router as auth_router
+from src.house.router import router as house_router
 from src.user.router import router as user_router
 
 
@@ -44,6 +45,7 @@ def create_app() -> FastAPI:
 
     app.include_router(user_router)
     app.include_router(auth_router)
+    app.include_router(house_router)
 
     return app
 

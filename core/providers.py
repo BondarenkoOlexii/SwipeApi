@@ -11,6 +11,8 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from src.authorization.services import AuthorizationService
 from src.common.storage import StorageFile
+from src.house.repositories import HouseRepositories
+from src.house.services import HouseService
 from src.user.repositories import UserRepository
 from src.user.services import UserService
 
@@ -52,3 +54,5 @@ class RepositoryProvider(Provider):
     user_repo = provide(UserRepository)
     user_service = provide(UserService)
     auth_service = provide(AuthorizationService)
+    house_service = provide(HouseService)
+    house_repositories = provide(HouseRepositories)
