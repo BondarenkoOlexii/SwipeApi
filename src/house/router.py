@@ -68,3 +68,11 @@ async def upload_files(
     current_user: Annotated[User, Depends(token_check)],
 ):
     return await service.upload_images(house_id=current_user.id, images=files)
+
+
+# def create_building_entity_router(prefix: str, tag: str, service_type: type) -> APIRouter:
+#     build_entity_router = APIRouter(prefix=prefix, tags=[tag])
+#
+#     @build_entity_router.get("/", response_model=GetCorpSectStor)
+#     @inject
+# async def get_corp_sect_stor(item_id: int, service:FromDishka[])

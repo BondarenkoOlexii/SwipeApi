@@ -1,3 +1,6 @@
+from typing import Generic
+from typing import TypeVar
+
 from fastapi import HTTPException
 from fastapi import UploadFile
 
@@ -6,7 +9,10 @@ from src.common.models import UserTypes
 from src.common.storage import StorageFile
 from src.user.repositories import UserRepository
 
+from .repositories import CrudClass
 from .repositories import HouseRepositories
+
+M = TypeVar("M")
 
 
 class HouseService:
@@ -83,3 +89,42 @@ class HouseService:
             images_list.append(uploaded_image)
 
         return images_list
+
+
+class BuildEntityService(Generic[M]):
+    def __init__(self, model_type: type[M], fk_field_name: str, repo: CrudClass):
+        self.model_type = model_type
+        self.fk_field_name = fk_field_name
+        self.repo = repo
+
+    async def _verify_fk(self, item_id: int):
+        return await self.repo.get(item_id)
+
+    async def get_entitys(self, item_id: int):
+        return await self.repo.get_all(item_id=item_id, fk_name=self.fk_field_name)
+
+    async def get_entity(self, item_id: int):
+        return await self.repo.get(item_id=item_id)
+
+    async def create_entity(self, data: dict, parent_id: int):
+        obj = self.repo.get_by_name(
+            parent_id=parent_id, fk_name=self.fk_field_name, name=data["name"]
+        )
+        if obj:
+            raise HTTPException(status_code=404, detail="Object found, poshel nahuy")
+        return await self.repo.create(
+            data=data, parent_id=parent_id, fk_field=self.fk_field_name
+        )
+
+    async def update_entity(self, data: dict, item_id: int):
+        obj = self.repo.get(item_id=item_id)
+
+        if not obj:
+            raise HTTPException(
+                status_code=404, detail="Object doesnt found, poshel nahuy"
+            )
+        return self.repo.update(item_id)
+
+    async def delete_entity(self, item_id: int):
+        await self.repo.delete()
+        return None

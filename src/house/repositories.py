@@ -62,18 +62,31 @@ class CrudClass(Generic[M]):
         self.Model = model
         self.session = session
 
-    async def get_all(self):
-        stmt = select(self.Model)
-        objects = self.session.scalars(stmt).all()
-        return objects
+    async def get_all(self, item_id: int, fk_name: str):
+        field = getattr(self.Model, fk_name)
+        stmt = select(self.Model).where(field == item_id)
+        objects = self.session.scalars(stmt)
+        return list(objects.all())
 
     async def get(self, item_id: int):
         return self.session.get(self.Model, item_id)
 
-    async def create(self, data: dict):
-        obj = self.Model(**data)
+    async def get_by_name(self, name: str, parent_id: int, fk_name: str):
+        field = getattr(self.Model, fk_name)
+        stmt = select(self.Model).where(name=name and field == parent_id)
+        item = self.session.scalar(stmt)
+        return item
+
+    async def create(self, data: dict, fk_field: str, parent_id: int):
+        payload = data.copy()
+
+        payload[fk_field] = parent_id
+
+        obj = self.Model(**payload)
+
         self.session.add(obj)
         await self.session.commit()
+        await self.session.refresh(obj)
         return obj
 
     async def update(self, data: dict):
