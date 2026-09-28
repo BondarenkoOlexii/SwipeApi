@@ -12,7 +12,10 @@ from core.config import Settings
 from core.providers import RepoProvider
 from core.providers import RepositoryProvider
 from src.authorization.router import router as auth_router
+from src.house.router import GenericCRUDRouters
 from src.house.router import router as house_router
+from src.house.schemas import CreateCorpSectStor
+from src.house.schemas import UpdateCorpSectStor
 from src.user.router import router as user_router
 
 
@@ -46,6 +49,34 @@ def create_app() -> FastAPI:
     app.include_router(user_router)
     app.include_router(auth_router)
     app.include_router(house_router)
+
+    corpus_router = GenericCRUDRouters(  # ПЕРЕРОБИТИ PREFIX !!!!!
+        create_schema=CreateCorpSectStor,
+        get_schema=GenericCRUDRouters,
+        update_schema=UpdateCorpSectStor,
+        prefix="corps",
+        tags="Corps",
+    )
+    app.include_router(corpus_router)
+
+    section_router = GenericCRUDRouters(
+        create_schema=CreateCorpSectStor,
+        get_schema=GenericCRUDRouters,
+        update_schema=UpdateCorpSectStor,
+        prefix="section",
+        tags="Section",
+    )
+
+    app.include_router(section_router)
+
+    storey_router = GenericCRUDRouters(
+        create_schema=CreateCorpSectStor,
+        get_schema=GenericCRUDRouters,
+        update_schema=UpdateCorpSectStor,
+        prefix="storey",
+        tags="Storey",
+    )
+    app.include_router(storey_router)
 
     return app
 

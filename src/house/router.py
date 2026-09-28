@@ -1,4 +1,6 @@
 from typing import Annotated
+from typing import Generic
+from typing import TypeVar
 
 from dishka.integrations.fastapi import FromDishka
 from dishka.integrations.fastapi import inject
@@ -13,6 +15,7 @@ from .schemas import CreateHouse
 from .schemas import DeleteHouse
 from .schemas import GetHouse
 from .schemas import UpdateHouse
+from .services import BuildEntityService
 from .services import HouseService
 
 router = APIRouter(prefix="/house", tags=["House"])
@@ -76,3 +79,59 @@ async def upload_files(
 #     @build_entity_router.get("/", response_model=GetCorpSectStor)
 #     @inject
 # async def get_corp_sect_stor(item_id: int, service:FromDishka[])
+
+ModelType = TypeVar("ModelType")
+CreateSchemaType = TypeVar("CreateSchemaType")
+GetSchemaType = TypeVar("GetSchemaType")
+UpdateSchemaType = TypeVar("UpdateSchemaType")
+
+
+class GenericCRUDRouters(Generic[CreateSchemaType, GetSchemaType, UpdateSchemaType]):
+    def __init__(
+        self,
+        create_schema: type[CreateSchemaType],
+        get_schema: type[GetSchemaType],
+        update_schema: type[UpdateSchemaType],
+        prefix: str,
+        tags: str,
+    ):
+        self.create_schema = create_schema
+        self.get_schema = get_schema
+        self.update_schema = update_schema
+        self.prefix = prefix
+
+        self.router = APIRouter(prefix=f"/{prefix}", tags=[tags])
+
+    async def router_get(self, item_id: int, service: FromDishka[BuildEntityService]):
+        return await service.get_entity(item_id)
+
+    async def router_create(
+        self,
+        data_schema: CreateSchemaType,
+        service: FromDishka[BuildEntityService],
+        parent_id: int,
+    ):
+        return await service.create_entity(
+            parent_id=parent_id, data=data_schema.model_dump()
+        )
+
+    async def router_update(
+        self,
+        data_schema: UpdateSchemaType,
+        service: FromDishka[BuildEntityService],
+        item_id: int,
+    ):
+        return await service.update_entity(
+            data=data_schema.model_dump(), item_id=item_id
+        )
+
+    async def router_delete(
+        self, item_id: int, service: FromDishka[BuildEntityService]
+    ):
+        return await service.delete_entity(item_id=item_id)
+
+    def register_routers(self):
+        self.router.add_api_route("/get", self.router_get, methods=["GET"])
+        self.router.add_api_route("/create", self.router_create, methods=["POST"])
+        self.router.add_api_route("/update", self.router_update, methods=["PATCH"])
+        self.router.add_api_route("/delete", self.router_delete, methods=["DELETE"])

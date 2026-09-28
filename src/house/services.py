@@ -97,8 +97,11 @@ class BuildEntityService(Generic[M]):
         self.fk_field_name = fk_field_name
         self.repo = repo
 
-    async def _verify_fk(self, item_id: int):
-        return await self.repo.get(item_id)
+    async def _verify_item(self, item_id: int):
+        item = await self.repo.get(item_id)
+        if item:
+            return item
+        return HTTPException(status_code=404, detail="Object doesn't found")
 
     async def get_entitys(self, item_id: int):
         return await self.repo.get_all(item_id=item_id, fk_name=self.fk_field_name)
@@ -117,14 +120,10 @@ class BuildEntityService(Generic[M]):
         )
 
     async def update_entity(self, data: dict, item_id: int):
-        obj = self.repo.get(item_id=item_id)
-
-        if not obj:
-            raise HTTPException(
-                status_code=404, detail="Object doesnt found, poshel nahuy"
-            )
+        await self._verify_item(item_id=item_id)
         return self.repo.update(item_id)
 
     async def delete_entity(self, item_id: int):
+        await self._verify_item(item_id=item_id)
         await self.repo.delete()
         return None
