@@ -1,52 +1,129 @@
+from typing import Generic
+from typing import TypeVar
+
 from fastapi import HTTPException
 from fastapi import UploadFile
-from fastapi import status
 
-from core.config import ALLOWED_TYPES
-from core.config import MAX_FILE_SIZE
-from src.common.storage import StorageFile
-
-from .repositories import HouseRepositories
-from src.user.repositories import UserRepository
+from src.common.models import ImageTypeChoice
 from src.common.models import UserTypes
+from src.common.storage import StorageFile
+from src.user.repositories import UserRepository
+
+from .repositories import CrudClass
+from .repositories import HouseRepositories
+
+M = TypeVar("M")
 
 
 class HouseService:
-
-    def __init__(self, repo: HouseRepositories, user_repo: UserRepository, storage: StorageFile):
+    def __init__(
+        self, repo: HouseRepositories, user_repo: UserRepository, storage: StorageFile
+    ):
         self.repo = repo
         self.user_repo = user_repo
         self.storage = storage
 
-    async def get_house(self, house_id):
-        house = self.repo.get_house(house_id)
-        if house:
-            return house
-        else:
-            raise HTTPException(status_code=401, detail=f"House with id - {house_id} not found")\
+    async def _verify_house(self, house_id: int):
+        house = await self.repo.get_house(house_id=house_id)
+        if not house:
+            raise HTTPException(status_code=404, detail="House doesnt found")
+        return house
 
+    def _verify_manager(self, manager_id: int, house):
+        if house.manager_id != manager_id:
+            raise HTTPException(status_code=403, detail="Your cant change this house")
+        return house
+
+    async def get_house(self, house_id):
+        return await self._verify_house(house_id)
 
     async def create_house(self, data: dict, manager_id: int):
         developer = await self.user_repo.get_user(manager_id)
 
         if not developer:
-            raise HTTPException(status_code=401, detail='developer return None')
+            raise HTTPException(status_code=401, detail="developer return None")
         if developer.user_type == UserTypes.Developer:
-            data_with_manager = {**data, 'manager_id': manager_id}
+            data_with_manager = {**data, "manager_id": manager_id}
             new_house = await self.repo.create_house(data=data_with_manager)
             return new_house
         else:
-            raise HTTPException(status_code=401, detail='This user, is not developer')
+            raise HTTPException(status_code=401, detail="This user, is not developer")
 
     async def delete_house(self, house_id: int, manager_id: int):
-        house = await self.repo.get_house(house_id)
+        house = await self._verify_house(house_id)
 
-        if not house:
-            raise HTTPException(status_code=400, detail='The house is not found')
-        if house.manager_id != manager_id:
-            raise HTTPException(status_code=403, detail='You are not the need manager')
+        self._verify_manager(manager_id=manager_id, house=house)
+
         await self.repo.delete_house(house)
         return None
 
-    async def update_house(self, house_data: dict, manager_id: int):
-        pass
+    async def update_house(self, house_data: dict, manager_id: int, house_id: int):
+        house = await self._verify_house(house_id)
+
+        self._verify_manager(manager_id=manager_id, house=house)
+
+        new_house = await self.repo.update_house(house=house, data=house_data)
+
+        return new_house
+
+    async def upload_images(self, house_id: int, images: list[UploadFile]):
+        images_list = []
+
+        for image in images:
+            check_image = self.storage.audit_photo(file=image)
+
+            house_image = self.repo.get_house_images(house_id)
+
+            if house_image:
+                await self.storage.delete_file(check_image)
+
+                new_image = await self.storage.download_file(image)
+
+            else:
+                new_image = await self.storage.download_file(image)
+
+            uploaded_image = await self.repo.upload_file(
+                house_id=house_id, file=new_image, type=ImageTypeChoice.Gallery
+            )
+
+            images_list.append(uploaded_image)
+
+        return images_list
+
+
+class BuildEntityService(Generic[M]):
+    def __init__(self, model_type: type[M], fk_field_name: str, repo: CrudClass):
+        self.model_type = model_type
+        self.fk_field_name = fk_field_name
+        self.repo = repo
+
+    async def _verify_item(self, item_id: int):
+        item = await self.repo.get(item_id)
+        if item:
+            return item
+        return HTTPException(status_code=404, detail="Object doesn't found")
+
+    async def get_entitys(self, item_id: int):
+        return await self.repo.get_all(item_id=item_id, fk_name=self.fk_field_name)
+
+    async def get_entity(self, item_id: int):
+        return await self.repo.get(item_id=item_id)
+
+    async def create_entity(self, data: dict, parent_id: int):
+        obj = self.repo.get_by_name(
+            parent_id=parent_id, fk_name=self.fk_field_name, name=data["name"]
+        )
+        if obj:
+            raise HTTPException(status_code=404, detail="Object found, poshel nahuy")
+        return await self.repo.create(
+            data=data, parent_id=parent_id, fk_field=self.fk_field_name
+        )
+
+    async def update_entity(self, data: dict, item_id: int):
+        await self._verify_item(item_id=item_id)
+        return self.repo.update(item_id)
+
+    async def delete_entity(self, item_id: int):
+        await self._verify_item(item_id=item_id)
+        await self.repo.delete()
+        return None
