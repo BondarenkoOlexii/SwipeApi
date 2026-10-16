@@ -34,7 +34,7 @@ class CreateCorpSectStor(BaseModel):
     name: str
 
 
-class GetCorpSectStor(CreateCorpSectStor):
+class GetCorpSectStor(BaseModel):
     id: int
     model_config = ConfigDict(from_attributes=True)
 

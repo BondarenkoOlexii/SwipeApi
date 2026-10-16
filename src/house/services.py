@@ -10,6 +10,7 @@ from src.common.storage import StorageFile
 from src.user.repositories import UserRepository
 
 from .repositories import CrudClass
+from .repositories import DetailHouseRepositories
 from .repositories import HouseRepositories
 
 M = TypeVar("M")
@@ -101,7 +102,7 @@ class BuildEntityService(Generic[M]):
         item = await self.repo.get(item_id)
         if item:
             return item
-        return HTTPException(status_code=404, detail="Object doesn't found")
+        raise HTTPException(status_code=404, detail="Object doesn't found")
 
     async def get_entitys(self, item_id: int):
         return await self.repo.get_all(item_id=item_id, fk_name=self.fk_field_name)
@@ -110,7 +111,7 @@ class BuildEntityService(Generic[M]):
         return await self.repo.get(item_id=item_id)
 
     async def create_entity(self, data: dict, parent_id: int):
-        obj = self.repo.get_by_name(
+        obj = await self.repo.get_by_name(
             parent_id=parent_id, fk_name=self.fk_field_name, name=data["name"]
         )
         if obj:
@@ -121,9 +122,40 @@ class BuildEntityService(Generic[M]):
 
     async def update_entity(self, data: dict, item_id: int):
         await self._verify_item(item_id=item_id)
-        return self.repo.update(item_id)
+        return await self.repo.update(item_id)
 
     async def delete_entity(self, item_id: int):
         await self._verify_item(item_id=item_id)
         await self.repo.delete()
         return None
+
+
+class DetailHouseService(Generic[M]):
+    def __init__(self, model_type: type[M], repo: DetailHouseRepositories):
+        self.repo = repo
+        self.model_type = model_type
+
+    async def _verify_house(self, house_id):
+        house = self.repo.get_house(house_id)
+        if not house:
+            raise HTTPException(404, detail="Their no house")
+        return house
+
+    async def get_all_items(self, house_id: int):
+        if await self._verify_house(house_id):
+            items = self.repo.get_all_from_house(house_id)
+            return items
+
+    async def get_item(self, item_id: int, house_id: int):
+        if await self._verify_house(house_id):
+            item = self.get_item(item_id=item_id, house_id=house_id)
+            return item
+
+    async def create_entity(self, house_id: int):
+        pass
+
+    async def update_entity(self, house_id: int, item_id: int):
+        pass
+
+    async def delete_entity(self, house_id: int, item_id: int):
+        pass
