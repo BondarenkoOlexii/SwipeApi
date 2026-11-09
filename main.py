@@ -12,12 +12,23 @@ from core.config import Settings
 from core.providers import RepoProvider
 from core.providers import RepositoryProvider
 from src.authorization.router import router as auth_router
-from src.house.router import GenericCrudRouter
+from src.house.router import GenericDetailHouseRouter
+from src.house.router import GenericHouseRouter
 from src.house.router import router as house_router
+from src.house.schemas import BaseGetSchema
+from src.house.schemas import CommunicationCreateSchema
+from src.house.schemas import CommunicationUpdateSchema
 from src.house.schemas import CreateCorpSectStor
 from src.house.schemas import GetCorpSectStor
+from src.house.schemas import InfrastructureCreateSchema
+from src.house.schemas import InfrastructureUpdateSchema
+from src.house.schemas import NewsCreateSchema
+from src.house.schemas import NewsUpdateSchema
+from src.house.schemas import RegistrationCreateSchema
+from src.house.schemas import RegistrationUpdateSchema
 from src.house.schemas import UpdateCorpSectStor
 from src.house.services import BuildEntityService
+from src.house.services import DetailHouseService
 from src.user.router import router as user_router
 
 
@@ -52,7 +63,7 @@ def create_app() -> FastAPI:
     app.include_router(auth_router)
     app.include_router(house_router)
 
-    corpus_router = GenericCrudRouter(  # ПЕРЕРОБИТИ PREFIX !!!!!
+    corpus_router = GenericHouseRouter(  # ПЕРЕРОБИТИ PREFIX !!!!!
         create_schema=CreateCorpSectStor,
         get_schema=GetCorpSectStor,
         update_schema=UpdateCorpSectStor,
@@ -60,9 +71,8 @@ def create_app() -> FastAPI:
         prefix="corps",
         tags="Corps",
     )
-    app.include_router(corpus_router.router)
 
-    section_router = GenericCrudRouter(
+    section_router = GenericHouseRouter(
         create_schema=CreateCorpSectStor,
         get_schema=GetCorpSectStor,
         update_schema=UpdateCorpSectStor,
@@ -71,9 +81,7 @@ def create_app() -> FastAPI:
         tags="Section",
     )
 
-    app.include_router(section_router.router)
-
-    storey_router = GenericCrudRouter(
+    storey_router = GenericHouseRouter(
         create_schema=CreateCorpSectStor,
         get_schema=GetCorpSectStor,
         update_schema=UpdateCorpSectStor,
@@ -81,7 +89,51 @@ def create_app() -> FastAPI:
         prefix="storey",
         tags="Storey",
     )
+
+    infrastructure_router = GenericDetailHouseRouter(
+        create_schema=InfrastructureCreateSchema,
+        update_schema=InfrastructureUpdateSchema,
+        get_schema=BaseGetSchema,
+        service_type=DetailHouseService,
+        prefix="infrastructure",
+        tags="Infrastructure",
+    )
+
+    news_router = GenericDetailHouseRouter(
+        create_schema=NewsCreateSchema,
+        update_schema=NewsUpdateSchema,
+        get_schema=BaseGetSchema,
+        service_type=DetailHouseService,
+        prefix="news",
+        tags="News",
+    )
+
+    communication_router = GenericDetailHouseRouter(
+        create_schema=CommunicationCreateSchema,
+        update_schema=CommunicationUpdateSchema,
+        get_schema=BaseGetSchema,
+        service_type=DetailHouseService,
+        prefix="communication",
+        tags="Communication",
+    )
+
+    registration_router = GenericDetailHouseRouter(
+        create_schema=RegistrationCreateSchema,
+        update_schema=RegistrationUpdateSchema,
+        get_schema=BaseGetSchema,
+        service_type=DetailHouseService,
+        prefix="registration",
+        tags="Registration",
+    )
+
+    app.include_router(corpus_router.router)
+    app.include_router(section_router.router)
     app.include_router(storey_router.router)
+
+    app.include_router(infrastructure_router.router)
+    app.include_router(news_router.router)
+    app.include_router(communication_router.router)
+    app.include_router(registration_router.router)
 
     return app
 

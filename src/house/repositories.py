@@ -1,6 +1,7 @@
 from typing import Generic
 from typing import TypeVar
 
+from sqlalchemy import insert
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -21,11 +22,11 @@ class BaseRepo:
     async def get_house(self, house_id: int) -> House | None:
         return await self.session.get(House, house_id)
 
-    async def get_manager(self, manager_id: int) -> User | None:
+    async def _get_manager(self, manager_id: int) -> User | None:
         return await self.session.get(User, User.id == manager_id)
 
     async def verify_manager(self, house_id: int, manager_id: int):
-        if await self.get_manager(manager_id):
+        if await self._get_manager(manager_id):
             stmt = select(House).where(
                 House.id == house_id, House.manager_id == manager_id
             )
@@ -79,6 +80,23 @@ class HouseRepositories:
         return await self.session.scalar(stmt)
 
 
+class HouseBulkRepositories(Generic[M]):
+    def __init__(self, session: AsyncSession, model: type[M]):
+        self.session = session
+        self.Model = model
+
+    async def bulk_items_create(self, items_data: dict):
+        stmt = insert(self.Model).returning(self.Model.id)
+
+        result = await self.session.execute(stmt, items_data)
+
+        await self.session.commit()
+
+        created_ids = list(result.scalars().all())
+
+        return created_ids
+
+
 class DetailHouseRepositories(Generic[M], BaseRepo):
     def __init__(self, session: AsyncSession, model: type[M]):
         super().__init__(session)
@@ -126,10 +144,10 @@ class DetailHouseRepositories(Generic[M], BaseRepo):
         return None
 
 
-class CrudClass(Generic[M]):
+class CrudClass(Generic[M], BaseRepo):
     def __init__(self, session: AsyncSession, model: type[M]):
+        super().__init__(session)
         self.Model = model
-        self.session = session
 
     async def get_all(self, item_id: int, fk_name: str):
         field = getattr(self.Model, fk_name)

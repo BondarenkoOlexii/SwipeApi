@@ -67,6 +67,11 @@ class HouseService:
 
         return new_house
 
+    async def create_all_house(self, house_id: int, manager_id: int, house_data: dict):
+        house = await self._verify_house(house_id)
+
+        self._verify_manager(manager_id, house=house)
+
     async def upload_images(self, house_id: int, images: list[UploadFile]):
         images_list = []
 
@@ -110,7 +115,12 @@ class BuildEntityService(Generic[M]):
     async def get_entity(self, item_id: int):
         return await self.repo.get(item_id=item_id)
 
-    async def create_entity(self, data: dict, parent_id: int):
+    async def create_entity(self, data: dict, parent_id: int, manager_id: int):
+        if not await self.repo.verify_manager(
+            house_id=parent_id, manager_id=manager_id
+        ):
+            raise HTTPException(401, detail="Pashol Nahuy")
+
         obj = await self.repo.get_by_name(
             parent_id=parent_id, fk_name=self.fk_field_name, name=data["name"]
         )
@@ -120,11 +130,19 @@ class BuildEntityService(Generic[M]):
             data=data, parent_id=parent_id, fk_field=self.fk_field_name
         )
 
-    async def update_entity(self, data: dict, item_id: int):
+    async def update_entity(
+        self, data: dict, house_id: int, item_id: int, manager_id: int
+    ):
+        if not await self.repo.verify_manager(house_id=house_id, manager_id=manager_id):
+            raise HTTPException(401, detail="Pashol Nahuy")
+
         await self._verify_item(item_id=item_id)
         return await self.repo.update(item_id)
 
-    async def delete_entity(self, item_id: int):
+    async def delete_entity(self, item_id: int, house_id: int, manager_id: int):
+        if not await self.repo.verify_manager(house_id=house_id, manager_id=manager_id):
+            raise HTTPException(401, detail="Pashol Nahuy")
+
         await self._verify_item(item_id=item_id)
         await self.repo.delete()
         return None
@@ -142,20 +160,41 @@ class DetailHouseService(Generic[M]):
         return house
 
     async def get_all_items(self, house_id: int):
-        if await self._verify_house(house_id):
-            items = self.repo.get_all_from_house(house_id)
-            return items
+        await self._verify_house(house_id)
+        return self.repo.get_all_from_house(house_id)
 
     async def get_item(self, item_id: int, house_id: int):
-        if await self._verify_house(house_id):
-            item = self.get_item(item_id=item_id, house_id=house_id)
-            return item
+        await self._verify_house(house_id)
 
-    async def create_entity(self, house_id: int):
-        pass
+        item = self.get_item(item_id=item_id, house_id=house_id)
+        return item
 
-    async def update_entity(self, house_id: int, item_id: int):
-        pass
+    async def create_entity(self, house_id: int, manager_id: int, data: dict):
+        if not await self.repo.verify_manager(house_id=house_id, manager_id=manager_id):
+            raise HTTPException(401, detail="Pashol Nahuy")
 
-    async def delete_entity(self, house_id: int, item_id: int):
-        pass
+        if await self.repo.get_house(house_id):
+            raise HTTPException(400, detail="Pashol Nahuy, dom esty")
+
+        item = await self.repo.create_item(house_id=house_id, data=data)
+        return item
+
+    async def update_entity(
+        self, house_id: int, item_id: int, data: dict, manager_id: int
+    ):
+        if not await self.repo.verify_manager(house_id=house_id, manager_id=manager_id):
+            raise HTTPException(401, detail="Pashol Nahuy")
+
+        if not await self.repo.get_house(house_id):
+            raise HTTPException(400, detail="Pashol Nahuy, dom esty")
+
+        return await self.repo.update(data=data, item_id=item_id)
+
+    async def delete_entity(self, house_id: int, item_id: int, manager_id: int):
+        if not await self.repo.verify_manager(house_id=house_id, manager_id=manager_id):
+            raise HTTPException(401, detail="Pashol Nahuy")
+
+        if not await self.repo.get_house(house_id):
+            raise HTTPException(400, detail="Pashol Nahuy, dom esty")
+
+        return await self.repo.delete(item_id)

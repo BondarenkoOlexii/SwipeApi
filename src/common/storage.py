@@ -65,3 +65,17 @@ class StorageFile:
             return False
 
         return False
+
+
+# class ExcelWorker:
+#     def __init__(self, file_path: Path):
+#         self.file_path = file_path
+#
+#     def get_file(self):
+#         excel_file = pd.read_excel(self.file_path)
+#
+#         for (
+#             index,
+#             row,
+#         ) in excel_file.iterrows():  # Це проход по рядках, далі треба брати який саме в нас файл і від нього пригати
+#             pass  # row.get()

@@ -12,6 +12,7 @@ from fastapi import UploadFile
 from src.authorization.dependencies import token_check
 from src.user.models import User
 
+from .schemas import CreateAllForHouse
 from .schemas import CreateHouse
 from .schemas import DeleteHouse
 from .schemas import GetHouse
@@ -73,34 +74,58 @@ async def upload_files(
     return await service.upload_images(house_id=current_user.id, images=files)
 
 
+@router.post("/{house_id}/create_now")
+@inject
+async def create_now_all(
+    service: FromDishka[HouseService],
+    current_user: Annotated[User, Depends(token_check)],
+    house_schema: CreateAllForHouse,
+):
+    pass
+
+
 ServiceType = TypeVar("ServiceType")
 CreateSchemaType = TypeVar("CreateSchemaType")
 GetSchemaType = TypeVar("GetSchemaType")
 UpdateSchemaType = TypeVar("UpdateSchemaType")
 
 
-class GenericCrudRouter(
+class BasicGenericCrudRouter(
     Generic[CreateSchemaType, GetSchemaType, UpdateSchemaType, ServiceType]
 ):
     def __init__(
         self,
-        create_schema: type[CreateSchemaType],
-        update_schema: type[UpdateSchemaType],
-        get_schema: type[GetSchemaType],
         prefix: str,
         tags: str,
         service_type: type[ServiceType],
     ):
+        self.service_type = service_type
         self.router = APIRouter(
             prefix=f"/{prefix}", tags=[tags], route_class=DishkaRoute
         )
+
+
+class GenericHouseRouter(BasicGenericCrudRouter):
+    def __init__(
+        self,
+        prefix: str,
+        tags: str,
+        service_type,
+        create_schema: type[CreateSchemaType],
+        update_schema: type[UpdateSchemaType],
+        get_schema: type[GetSchemaType],
+    ):
+        super().__init__(prefix, tags, service_type)
 
         self._registry(create_schema, get_schema, update_schema, service_type)
 
     def _registry(self, create_schema, get_schema, update_schema, service_type):
         @self.router.get("/{parent_id}", response_model=get_schema)
         @inject
-        async def get_entity(parent_id: int, service_type: FromDishka[service_type]):
+        async def get_entity(
+            parent_id: int,
+            service_type: FromDishka[service_type],
+        ):
             return await service_type.get_entity(parent_id)
 
         @self.router.post("/{parent_id}/create", response_model=create_schema)
@@ -118,3 +143,71 @@ class GenericCrudRouter(
         @self.router.delete("/delete")
         async def delete_entity(item_id: int, service_type: FromDishka[service_type]):
             return await service_type.delete_entity(item_id)
+
+
+class GenericDetailHouseRouter(BasicGenericCrudRouter):
+    def __init__(
+        self,
+        prefix: str,
+        tags: str,
+        service_type,
+        create_schema: type[CreateSchemaType],
+        update_schema: type[UpdateSchemaType],
+        get_schema: type[GetSchemaType],
+    ):
+        super().__init__(prefix, tags, service_type)
+
+    def _registry(self, create_schema, get_schema, update_schema, service_type):
+        @self.router.get("/{parent_id}", response_model=get_schema)
+        @inject
+        async def get_entitys(parent_id: int, service_type: FromDishka[service_type]):
+            return await service_type.get_all_items(parent_id)
+
+        @self.router.get("/{parent_id}/{item_id}", response_model=get_schema)
+        @inject
+        async def get_entity(
+            parent_id: int, item_id: int, service_type: FromDishka[service_type]
+        ):
+            return await service_type.get_item(
+                item_id=item_id,
+                house_id=parent_id,
+            )
+
+        @self.router.post("/{parent_id}/create", response_model=create_schema)
+        async def create_entity(
+            parent_id: int,
+            service_type: FromDishka[service_type],
+            current_user: Annotated[User, Depends(token_check)],
+        ):
+            return await service_type.create_entity(
+                house_id=parent_id,
+                manager_id=current_user.id,
+                data=create_schema.model_dump(),
+            )
+
+        @self.router.patch(
+            "/{parent_id}/{item_id}/update", response_model=update_schema
+        )
+        async def update_entity(
+            item_id: int,
+            parent_id: int,
+            service_type: FromDishka[service_type],
+            current_user: Annotated[User, Depends(token_check)],
+        ):
+            return await service_type.update_entity(
+                house_id=parent_id,
+                item_id=item_id,
+                data=update_schema.model_dump(),
+                manager_id=current_user.id,
+            )
+
+        @self.router.delete("{parent_id}/{item_id}/delete")
+        async def delete_entity(
+            house_id: int,
+            item_id: int,
+            service_type: FromDishka[service_type],
+            current_user: Annotated[User, Depends(token_check)],
+        ):
+            return await service_type.delete_entity(
+                house_id=house_id, item_id=item_id, manager_id=current_user.id
+            )
