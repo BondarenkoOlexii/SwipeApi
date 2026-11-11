@@ -7,3 +7,5 @@ __pycache__/
 migrations/versions
 
 src/common/registry.py
+
+test.py
