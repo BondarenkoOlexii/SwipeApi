@@ -81,3 +81,37 @@ class UserRepository:
             .options(selectinload(UserImageAssociation.image.filepath))
         )
         return await self.session.scalar(stmt)
+
+
+class AgentNotaryRepository:
+    def __init__(self, session: AsyncSession):
+        self.session = session
+
+    async def get_user(self, user_id: int):
+        return await self.session.get(User, user_id)
+
+    async def check_agentnotary(self, user_id: int):
+        agent_notary = self.get_user(user_id)
+        return agent_notary.user_type
+
+    async def create_agentnotary(self, data: dict):
+        agentnotary = User(**data)
+        self.session.add(agentnotary)
+        await self.session.commit()
+        return agentnotary
+
+    async def update_agentnotary(self, user_id: int, data: dict):
+        user = self.get_user(user_id)
+        for key, value in data.items():
+            setattr(user, key, value)
+        await self.session.commit()
+        return user
+
+    async def delete_agentnotary(self, user_id: int):
+        user = self.get_user(user_id)
+
+        if user:
+            await self.session.delete(user)
+            await self.session.commit()
+            return None
+        return None
